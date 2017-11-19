@@ -4,12 +4,13 @@ title: "kii web application"
 date: 2014-12-11 19:32:27 +0100
 comments: true
 categories: [javascript, angularjs, android, genymotion, mobile, ios]
+toc: true
+toc_label: "on this page"
+toc_icon: "list"  # corresponding Font Awesome icon name (without fa prefix)
 ---
 The current __tut__ explore how to create a simple mobile application with HTML5, CSS3 and JavaScript based on the new Kii Javascript SDK. Basically Kii Corporation offers a rich cloud mobile backend to help the development of a mobile application providing some services out of the box such as user registration and login. Then the application will be wrapped by Apache Cordova to obtain a deployable app for iOS and Android in a hybrid fashion.
 
 ![image-center](/images/kii/genymotion-get-your-box.png ){: .align-center}
-
-{% include toc icon="gears" title="Contents" %}
 
 ## Preview of the application in Plunker
 A preview of the web application that is going to be implemented can be seen and tested in <a href="http://plnkr.co/edit/mSrWyzmmgOeSzCDKRWk8?p=preview" target="_blank">Plunker</a> using ``jon/dohh`` as username/password or just registering a new user. Password must be at least 4 charaters and special ones are not allowed
