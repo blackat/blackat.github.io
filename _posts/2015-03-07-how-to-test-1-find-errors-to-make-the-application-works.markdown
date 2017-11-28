@@ -12,6 +12,7 @@ toc: true
 toc_label: "on this page"
 toc_icon: "list"  # corresponding Font Awesome icon name (without fa prefix)
 ---
+
 This is an _experiment tutorial_ to better learn some _101_ practices and how testing can be a better replacement of developing by debugging.
 
 The goal of the _experiment-project_ is to find, to correct bugs and make the application works by writing tests.

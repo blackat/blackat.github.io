@@ -1,0 +1,17 @@
+# main links
+main:
+  - title: "Design Patterns"
+    url: /docs/landing
+
+# documentation links
+docs:
+  - title: Design Patterns
+    children:
+      - title: "Java"
+        url: /docs/java-design-patterns/landing/
+      #- title: "JavaScript"
+      #  url: /docs/javascript-design-patterns/
+      #- title: "Installation"
+      #  url: /docs/installation/
+      #- title: "Upgrading"
+      #  url: /docs/upgrading/
