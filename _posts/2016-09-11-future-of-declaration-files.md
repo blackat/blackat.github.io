@@ -10,8 +10,9 @@ tags:
   - typings
 toc: true
 toc_label: "on this page"
-toc_icon: "list"  # corresponding Font Awesome icon name (without fa prefix)
+toc_icon: "list"
 ---
+
 When I have started to use TypeScript I have looked at [Definitely Typed](http://definitelytyped.org/) to see how many  people where writing declaration files (`.d.ts`) and then [guidelines from Microsoft](https://typescript.codeplex.com/wikipage?title=Writing%20Definition%20%28.d.ts%29%20Files) to see how to do it. There was then the utility [tsd](https://github.com/DefinitelyTyped/tsd), but now many stuff has changed.
 
 ## Evolution at Glance

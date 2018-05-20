@@ -5,6 +5,8 @@ last_modified_at: 2017-11-15T09:49:52-05:00
 comments: false
 categories: [design patterns, singleton, java]
 toc: true
+toc_label: "on this page"
+toc_icon: "list"
 ---
 > The Singleton Pattern ensures a class has only one instance and provides a global point of access to it.
 

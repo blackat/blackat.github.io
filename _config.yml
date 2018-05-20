@@ -44,6 +44,9 @@ kramdown:
   smart_quotes: lsquo,rsquo,ldquo,rdquo
   enable_coderay: false
 
+# Server Config options
+livereload: true
+
 # Sass/SCSS
 sass:
   sass_dir: _sass
@@ -81,23 +84,9 @@ plugins:
 # Remote theme
 remote_theme: "mmistakes/minimal-mistakes"
 
-# Default settings
-defaults:
-  # _posts
-  - scope:
-      path: ""
-      type: posts
-    values:
-      layout: single
-      author_profile: true
-      read_time: true
-      comments: true
-      share: false
-      related: true
-
 # Author information
 author:
-  name   : "Your Name"
+  name   : "Eugenio Lentini"
   avatar : "/assets/images/blackat-mini.png"
   bio    : "Technology enthusiast, interested in computer languages, UI design, new development frameworks, but above all simplicity"
   email  : # optional

@@ -2,6 +2,8 @@
 main:
   - title: "Design Patterns"
     url: /docs/landing
+  - title: "VS Code"
+    url: /docs/vs-code
 
 # documentation links
 docs:
@@ -15,3 +17,4 @@ docs:
       #  url: /docs/installation/
       #- title: "Upgrading"
       #  url: /docs/upgrading/
+  - title: VS Code

@@ -5,6 +5,8 @@ excerpt: "."
 last_modified_at: 2017-11-15T09:49:52-05:00
 categories: [design patterns, creational patterns, java]
 toc: true
+toc_label: "on this page"
+toc_icon: "list"
 ---
 
 ## In a Nutshell

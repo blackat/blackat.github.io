@@ -11,7 +11,7 @@ tags:
   - shim
 toc: true
 toc_label: "on this page"
-toc_icon: "list"  # corresponding Font Awesome icon name (without fa prefix)
+toc_icon: "list"
 ---
 
 With the new ES6 specification, people talk more and more about polyfill and shim, sometimes as the term are interchangeable but, are they the same thing?

@@ -10,7 +10,7 @@ tags:
   - unit test
 toc: true
 toc_label: "on this page"
-toc_icon: "list"  # corresponding Font Awesome icon name (without fa prefix)
+toc_icon: "list"
 ---
 
 This is an _experiment tutorial_ to better learn some _101_ practices and how testing can be a better replacement of developing by debugging.
