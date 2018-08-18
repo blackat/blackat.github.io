@@ -11,6 +11,7 @@ tags:
 toc: true
 toc_label: "on this page"
 toc_icon: "list"
+toc_sticky: true
 ---
 ## Shadow DOM
 _Shadow DOM_ is part of Web Components technology suite to create resusable custom elements along with the _encapsulated functionalities_.

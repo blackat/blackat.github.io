@@ -11,6 +11,7 @@ tags:
 toc: true
 toc_label: "on this page"
 toc_icon: "list"
+toc_sticky: true
 ---
 
 A _piece of cake_ project to introduce the new Angular framework.
