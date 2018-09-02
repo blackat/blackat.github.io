@@ -27,5 +27,15 @@ Web components are made of _four main technologies_ that facilitate the creation
 - __HTML Templates:__ resusable templates by custom elements, these markup is not displayed in the rendered page thanks to (`<template>`)[https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template] and `<slot>` elements.
 - __HTML Imports:__ is mechanism to import a _custom component_ into pages.
 
+## <template>
+
+```html
+<link rel="import" href="component.tpl.html">
+```
+
 ## Refences
 [1]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template "HTML Content Template"
+
+[template example]: http://jsbin.com/qaxiw/7/edit?html,js,output
+[template tag]: https://www.html5rocks.com/en/tutorials/webcomponents/template/
+[html import]: https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports

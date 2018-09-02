@@ -14,110 +14,133 @@ toc_icon: "list"
 toc_sticky: true
 ---
 
-Angular Elements *library*{: .italic-red-text} provides a method to write components that can be used with frameworks different from Angular.
-Angular Elements can be used *everywhere*{: .italic-red-text} without any Angular knowledge and regardless the technology used to implement a web site:
+Angular Elements *library*{: .italic-red-text} provides a method to extend the HTML tag library writing components that can be used with any framework.
+The new components can be used *everywhere*{: .italic-red-text} without any Angular knowledge and regardless the technology used to implement a web site:
 
 - CMS
 - HTML and VanillaJS
 - React, Vue, etc
-- legacy AngularJS application instead of the `ngUpdate`.
+- legacy AngularJS application instead of the `ngUpdate` for the migration.
 
-**Pro Tip.** Angular Elements are *Angular Components* which are packed as [*Custom Elements*][custom elements], part of the [*Web Components*][web components], a suite of Web platform APIs.
+**Pro Tip.** Angular Elements are *Angular Components* packed as [*Custom Elements*][custom elements], part of the [*Web Components*][web components], a suite of Web platform APIs.
 {: .notice--info}
 
-### World of Custom Components
+## World of Custom Components
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Want to know the syntax difference between native Web Components, <a href="https://twitter.com/polymer?ref_src=twsrc%5Etfw">@polymer</a>, <a href="https://twitter.com/stenciljs?ref_src=twsrc%5Etfw">@stenciljs</a> and <a href="https://twitter.com/angular?ref_src=twsrc%5Etfw">@Angular</a> Elements? I created a repo that implements the same Todo list with those technologies<br>Repo: <a href="https://t.co/dWlM4Hsz4P">https://t.co/dWlM4Hsz4P</a> <br>Demo: <a href="https://t.co/5eo8NrxZQb">https://t.co/5eo8NrxZQb</a><a href="https://twitter.com/hashtag/TodoMVC?src=hash&amp;ref_src=twsrc%5Etfw">#TodoMVC</a> <a href="https://t.co/RMoNQOuBmV">pic.twitter.com/RMoNQOuBmV</a></p>&mdash; Julien Renaux 👨‍💻 (@julienrenaux) <a href="https://twitter.com/julienrenaux/status/957985488320843776?ref_src=twsrc%5Etfw">January 29, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> 
 
-The need of extending the HTML tag library with custom components
-and reusing them has lead companies to develop different techniques framework specific.
+Each framework provides a specific tailored mechanism to smoothly extend the HTML tag library w.r.t. its own way to configure, interact and update the DOM element.
 
-**Watch out.** Each one of the framework specific components libraries cannot be used neither by another framework or in a CMS or in a website implemented in HTML and JavaScript with standard Web API.
-{: .notice--danger}
+For instance in AngularJS, the developer can implement new HTML tags via the *directive*{: .italic-red-text} approach: a powerful technique to link together a controller and a template encapsulating everything in a new DOM element.
+
+Framework specific components libraries cannot be used neither by another framework or in a CMS or in a website implemented in HTML and JavaScript with standard Web API.
+
+**Nitty Gritty.** Web Components allow to extend the HTML developing new *cross browser DOM elements*. Encapsulation and private features enpower reusability avoiding collision with other elements ([Shadow DOM][shadow dom]).
+{: .notice--info}
 
 ## Web Components
 
-[Web components][what are web components] are a set of *web platform APIs*{: .italic-red-text} that allow you to create new custom, reusable, encapsulated HTML tags to use in web pages and web apps.
+[Web components][what are web components] are a set of *Web Platform APIs*{: .italic-red-text} to create new custom, reusable, encapsulated HTML tags that can be used *everywhere*{: .italic-red-text}.
 
-A new Custom Component or DOM element built on the Web Component standards, can be used across modern browsers in any web site, with any JavaScript library and framework.
+Developers can then extend HTML tag library writing new elements that encapsule style and behavior.
 
-Developers can then extend HTML writing new element encapsulating style and behavior.
+Web Components include four different technologies,
 
-Web Components include four different technologies, 
 - [Custom Elements:][custom elements] JavaScript APIs to define new DOM elements.
 - [Shodow DOM:][shadow dom] JavaScript APIs to render and attach and encapsulated Shadow DOM tree to an element whose features stay private and not collide with the rest of the document.
 - [HTML templates:][html template] write HTML templates that can be reused by custom elements using `<template>` and `<slot>` tags.
 - [HTML Imports:][html import] how to include and reuse HTML templates.
 
-**Pro Tip.** Angular Elements are powered by Custom Elements.
+**Pro Tip.** Angular Elements are powered by *Custom Elements*.
 {: .notice--info}
 
-### Web Components Example
+Web Components specification has moved from V0 to V1 introducing some 
 
-More examples are available on the [Web Components Github MDN repo][web components mdn github examples].
+### Extend the HTML with v1 Custom Elements
 
-// Notes
-The idea from Angular Elements, define and reuse everywhere, comes from the Web Components. Angular component it the angular way to define a custom element. Show
-- web component definition
-- web component example via the emoji
-- libraries to build web components (https://www.webcomponents.org/resources)
-  - add polyfills to have web components work in all major browsers
-  - boilerplate to define the project scaffolding
-    - Polymer Boilerplate
-    - ValillaJS Boilerplate
-    - etc
-  - Yeoman generator to automate scaffolding and building web components
-  - Polymer CLI to automate scaffolding and build Polymer-based web components.
-  - publish your component https://www.webcomponents.org/publish
-  - example https://www.webcomponents.org/element/PolymerElements/paper-icon-button
-- how use the custom element and shadow dom to implement a new DOM element
-  - in the example add the attribute, the property, some lifecycle hooks and the event.
-- how to work with angular component
-- the similarities such as input, output etc
-- example from angular element
+**Custom Element.** Web API that allow to extend the HTML tag system creating new custom DOM elements that encapsulate functinalities away from the rest of the code. It refers to [encapsulation principle][encapsulation] of the software engineering.
+{: .notice--info}
 
-The components on this site provide new HTML elements that you can use in your web pages and web applications.
+<iframe src="https://stackblitz.com/edit/custom-element-head-first?embed=1&file=icon-text.js&hideExplorer=1&view=editor" frameborder="0" style="overflow: hidden; height: 500px;width: 100%;"></iframe>
 
-Using a custom element is as simple as importing it, and using the new tags in an HTML document. For example, to use the Emoji Rain element:
+To define a new [v1 Custom Element][v0 to v1]:
 
-**Custom Element.** Technology that allow to extend the HTML tag system creating new custom DOM elements that encapsulate functinalities away from the rest of the code. It refers to [encapsulation principle][encapsulation] of the software engineering.
-{: .notice--primary}
-
-### Create Custom Element
-
-To define a new Custom Element:
 - create a ES6 class extending [`HTMLElement`][html element];
 - register the new class with the browser via the [`CustomElementRegistry`][custom registry] Web API: use [`window.customElements`] property of the `Window` interface to get an instance of it;
-- optionally use *lifecycle hooks*{: .italic-red-text} or *reactions*{: .italic-red-text}
+- use *lifecycle hooks*{: .italic-red-text} or *reactions*{: .italic-red-text}
   - `constructor`: initialize the state, set up event listeners or create a [Shadow DOM][shadow dom]
   - `connectedCallback`: called when the element is attached to the DOM, useful for setting up, fetching some resources or rendering
   - `disconnectedCallback`: called when the element is removed from the DOM, useful for cleaning up
   - `attributeChangedCallback(attrName, oldVal, newVal)`: called when an attribute registered in the `observedAttributes` property has been added, removed, updated or replaced
   - `adoptedCallback()`: called when the element has been moved into a new `document` (`document.adoptNode(el)`)
-- optionally associate events, as any other DOM element, using  [`EventTarget`][event target] method `addEventListener`.
+  - [examples][lifecycle hooks example]
+- events can be associated, as any other DOM element, using  [`EventTarget`][event target] method `addEventListener`.
 
-<iframe src="https://stackblitz.com/edit/custom-element-rocket?embed=1&file=index.js" frameborder="0" style="overflow: hidden; height: 500px;
-        width: 100%;"></iframe>
+### Shadow DOM
 
-**Pro Tip.** Refer to Google Web Fundamentals to have more exhastive definitions and examples about [Custom Elements][custom elements google example].
-{: .notice--info}
+Shadow DOM is more or less like a *scoped subtree inside the Custom Element*{: .italic-red-text} that helps to build a new DOM element.
 
-## Angular Elements: the bridge
+```javascript
+class RocketParagraph extends HTMLElement {
+  constructor() {
+
+    super()
+
+    const shadowRoot = this.attachShadow({ mode: 'open' })
+    shadowRoot.innerHTML = `<link rel="stylesheet" href="fontawesome.com/all.css">`
+
+    const span = document.createElement('span')
+    const icon = document.createElement('i')
+
+    ...
+
+    shadowRoot.appendChild(span)
+    shadowRoot.appendChild(icon)
+  }
+}
+window.customElements.define('rocket-paragraph', RocketParagraph)
+```
+
+> A [Shadow Root][shadow root] is the document fragment that gets attached to a "host" element. The act of attaching a shadow root is how the element gains its shadow DOM.
+
+{% include figure image_path="/assets/images/posts/shadow-dom-debugger.png" alt="Chrome debugger for Shadow DOM" caption="Shadow Root in the Chrome debugger." %}
+
+### Building Libraries
+
+There are [many libraries][web components help libraries] that help to build custom Web Components providing features such as:
+
+- boilerplate to define the project scaffolding
+  - Polymer Boilerplate
+  - ValillaJS Boilerplate
+  - etc
+- polyfills to have web components work in all major browsers
+- automatic build systems
+  - Yeoman generator to automate scaffolding and building web components.
+  - Polymer CLI to automate scaffolding and build Polymer-based web components.
+  
+Once created the component it can be [published][publish web component] and the downloaded and installed via a package manager like Bower.
+
+[Look for a component](https://www.webcomponents.org/), for instance [`emoji-rain`](https://www.webcomponents.org/element/notwaldorf/emoji-rain), install and use it in your web site.
+
+More examples are available on the [Web Components Github MDN repo][web components mdn github examples].
+
+## Angular Elements
 
 > Angular Component on the inside, standards on the outside.
 <cite>Rob Wormald</cite>
 {: .small}
 
-Angular Elements library is like a bridge between *Angular Components* and the *Custom Elements* part of the standard Web API.
+**Pro Tip.** Angular Elements are self-bootstrapping, they host an _Angular Component_ inside a _Custom Element_ and their usage is not anymore tied to a specific framework.
+{: .notice--info}
 
-**Angular Components** [act as a hosts][telerik angular elements] for **Custom Elements** mapping properties from the Angular world to the standard DOM APIs one:
+**Angular Components** [act as a hosts][telerik angular elements] for **Custom Elements** mapping properties from the Angular world to the Web Platform API standard:
+
 - `@Input` mapped to properties
 - `@Output` mapped to events
 - `@HostBinding` mapped to observed attributes
 - lifecycle hooks mapped to Custom Elements lifecycle hooks
 
-Whereas Inputs rely on the Custom Elements lifecycle hook, Outputs rely on the Custom Event API (spec).
-Both APIs are entirely separate from each other.
+Whereas *Inputs*{: .italic-red-text} rely on the Custom Elements lifecycle hook, *Outputs*{: .italic-red-text} rely on the Custom Event API (spec). Both APIs are entirely separate from each other.
 
 **[Dependency Injection.][telerik angular elements]** Angular Elements also let us take advantage of Angular's dependency injection. When we create a custom element using Angular Elements, we pass in a reference to the current module's injector. This injector lets us share context across multiple elements or use shared services.
 {: .notice--info}
@@ -127,16 +150,6 @@ Both APIs are entirely separate from each other.
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">PR for basic Shadow DOM v1 support in Angular - should make Elements more flexible, as you can now use &lt;slot&gt; elements to do basic content projection. <a href="https://t.co/SBwNBQmwwe">https://t.co/SBwNBQmwwe</a></p>&mdash; Rob Wormald (@robwormald) <a href="https://twitter.com/robwormald/status/1013121891941269504?ref_src=twsrc%5Etfw">June 30, 2018</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-
-- are self-bootstrapping;
-
-- host an _Angular Component_ inside a _Custom Element_;
- 
- Therefore using host stuff too much not only couples your app to a specific environment (browser), you're also limited to those specific methods and property.
-
- So for communication between components, use Input and Output, and use Host stuff only when you're developing a directive which more often than not is tied to a specific implementation anyways.
-
 
 ## Angular Elements: where to use
 
@@ -337,6 +350,11 @@ https://medium.com/@tomsu/building-web-components-with-angular-elements-746cd2a3
 [web components]: (https://developer.mozilla.org/en-US/docs/Web/Web_Components)
 [what are web components]: (https://www.webcomponents.org/introduction)
 [web components mdn github examples]: https://github.com/mdn/web-components-examples
+[web components spec]: http://www.w3.org/TR/components-intro
+[v0 to v1]: https://hayato.io/2016/shadowdomv1/
+[web components help libraries]: https://www.webcomponents.org/resources
+[publish web component]: https://www.webcomponents.org/publish
+[best practices]: https://www.webcomponents.org/community/articles/web-components-best-practices
 
 <!-- Custom Elements -->
 [example of registering a cutom element]: (https://stackblitz.com/edit/angular-f3nrpv?file=app%2Fapp.module.ts)
@@ -351,9 +369,12 @@ https://medium.com/@tomsu/building-web-components-with-angular-elements-746cd2a3
 [mozilla support]: https://bugzilla.mozilla.org/show_bug.cgi?id=889230
 [polyfill]: https://developers.google.com/web/fundamentals/web-components/customelements#polyfill
 [is custom element registered]: https://stackoverflow.com/questions/27334365/how-to-get-list-of-registered-custom-elements
+[polymer unregister custom element]: https://gist.github.com/ebidel/cea24a0c4fdcda8f8af2
+[lifecycle hooks example]: https://github.com/mdn/web-components-examples/blob/master/life-cycle-callbacks/main.js
 
 <!-- Shadow DOM -->
 [shadow dom]: https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
+[shadow root]: https://www.webcomponents.org/introduction#creating-and-using-a-shadow-root
 
 <!-- HTML Template -->
 [html template]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template
@@ -378,6 +399,7 @@ https://medium.com/@tomsu/building-web-components-with-angular-elements-746cd2a3
 
 <!-- Browser Support -->
 [custom elements browser]: https://caniuse.com/#feat=custom-elementsv1
+[ie status]: https://developer.microsoft.com/en-us/microsoft-edge/platform/status/
 
 <!-- Others -->
 [encapsulation]: https://en.wikipedia.org/wiki/Encapsulation_(computer_programming)
@@ -388,6 +410,12 @@ https://medium.com/@tomsu/building-web-components-with-angular-elements-746cd2a3
 
 <!-- Examples -->
 [dynamic dashboard]: https://t.co/DLlrTKpnfY
+
+<!-- Open Question -->
+<!--
+- are custom elements registered per tab or browser wise?
+- how unregister a custom element?
+-->
 
 // web components
 
