@@ -1,5 +1,7 @@
 # main links
 main:
+  - title: "Posts"
+    url: /year-archive/
   - title: "Design Patterns"
     url: /docs/landing
   - title: "VS Code"
