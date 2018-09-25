@@ -44,7 +44,7 @@ Framework specific components libraries cannot be used neither by another framew
 
 Developers can then extend HTML tag library writing new elements that encapsule style and behavior.
 
-Web Components include four different technologies,
+Web Components include four different technologies:
 
 - [Custom Elements:][custom elements] JavaScript APIs to define new DOM elements.
 - [Shodow DOM:][shadow dom] JavaScript APIs to render and attach and encapsulated Shadow DOM tree to an element whose features stay private and not collide with the rest of the document.
@@ -54,14 +54,16 @@ Web Components include four different technologies,
 **Pro Tip.** Angular Elements are powered by *Custom Elements*.
 {: .notice--info}
 
-Web Components specification has moved from V0 to V1 introducing some 
+**Watch out.** Web Components specification has moved from V0 to V1.
+{: .notice--primary}
 
-### Extend the HTML with v1 Custom Elements
+## Extend the HTML with v1 Custom Elements
 
-**Custom Element.** Web API that allow to extend the HTML tag system creating new custom DOM elements that encapsulate functinalities away from the rest of the code. It refers to [encapsulation principle][encapsulation] of the software engineering.
-{: .notice--info}
+Let's introduce an example to show how to implement a new custom element.
 
 <iframe src="https://stackblitz.com/edit/custom-element-head-first?embed=1&file=icon-text.js&hideExplorer=1&view=editor" frameborder="0" style="overflow: hidden; height: 500px;width: 100%;"></iframe>
+
+<br/>
 
 To define a new [v1 Custom Element][v0 to v1]:
 
@@ -73,10 +75,13 @@ To define a new [v1 Custom Element][v0 to v1]:
   - `disconnectedCallback`: called when the element is removed from the DOM, useful for cleaning up
   - `attributeChangedCallback(attrName, oldVal, newVal)`: called when an attribute registered in the `observedAttributes` property has been added, removed, updated or replaced
   - `adoptedCallback()`: called when the element has been moved into a new `document` (`document.adoptNode(el)`)
-  - [examples][lifecycle hooks example]
+  - [more examples][lifecycle hooks example]
 - events can be associated, as any other DOM element, using  [`EventTarget`][event target] method `addEventListener`.
 
-### Shadow DOM
+**Custom Element.** Web API that allow to extend the HTML tag system creating new custom DOM elements that encapsulate functinalities away from the rest of the code. It refers to [encapsulation principle][encapsulation] of the software engineering.
+{: .notice--info}
+
+## Shadow DOM Quick
 
 Shadow DOM is more or less like a *scoped subtree inside the Custom Element*{: .italic-red-text} that helps to build a new DOM element.
 
@@ -105,7 +110,7 @@ window.customElements.define('rocket-paragraph', RocketParagraph)
 
 {% include figure image_path="/assets/images/posts/shadow-dom-debugger.png" alt="Chrome debugger for Shadow DOM" caption="Shadow Root in the Chrome debugger." %}
 
-### Building Libraries
+## Building Libraries
 
 There are [many libraries][web components help libraries] that help to build custom Web Components providing features such as:
 
