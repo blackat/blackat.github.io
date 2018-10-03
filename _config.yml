@@ -13,6 +13,9 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
+
+# Remote theme
+remote_theme: "mmistakes/minimal-mistakes"
 minimal_mistakes_skin    : "dark" #"default" "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
@@ -98,9 +101,6 @@ compress_html:
   clippings: all
   ignore:
     envs: development
-
-# Remote theme
-remote_theme: "mmistakes/minimal-mistakes"
 
 # Social Sharing
 twitter:

@@ -1,8 +1,8 @@
 ---
 layout: single
 title: "Angular 6 Elements"
-date: '2018-05-20'
-last_modified_at: 2018-05-2'
+date: '2018-09-15'
+last_modified_at: 2018-09-15'
 comments: true
 categories:
   - Angular
@@ -20,10 +20,13 @@ The new components can be used *everywhere*{: .italic-red-text} without any Angu
 - CMS
 - HTML and VanillaJS
 - React, Vue, etc
-- legacy AngularJS application instead of the `ngUpdate` for the migration.
+- legacy AngularJS application as an alternative to `ngUpdate` for the migration.
 
-**Pro Tip.** Angular Elements are *Angular Components* packed as [*Custom Elements*][custom elements], part of the [*Web Components*][web components], a suite of Web platform APIs.
-{: .notice--info}
+Angular Elements project has been revealed at the AngularConnect 2017 by Rob Worlmald
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Here&#39;s the slides from my Angular Elements talk @ <a href="https://twitter.com/hashtag/AngularConnect?src=hash&amp;ref_src=twsrc%5Etfw">#AngularConnect</a> - <a href="https://t.co/4kuySZ9zMs">https://t.co/4kuySZ9zMs</a></p>&mdash; Rob Wormald (@robwormald) <a href="https://twitter.com/robwormald/status/928250099054120960?ref_src=twsrc%5Etfw">November 8, 2017</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 
 ## World of Custom Components
 
@@ -33,7 +36,7 @@ Each framework provides a specific tailored mechanism to smoothly extend the HTM
 
 For instance in AngularJS, the developer can implement new HTML tags via the *directive*{: .italic-red-text} approach: a powerful technique to link together a controller and a template encapsulating everything in a new DOM element.
 
-Framework specific components libraries cannot be used neither by another framework or in a CMS or in a website implemented in HTML and JavaScript with standard Web API.
+Framework specific components libraries cannot be used neither by another framework nor in a CMS nor in a website implemented in HTML and JavaScript with standard Web API.
 
 **Nitty Gritty.** Web Components allow to extend the HTML developing new *cross browser DOM elements*. Encapsulation and private features enpower reusability avoiding collision with other elements ([Shadow DOM][shadow dom]).
 {: .notice--info}
@@ -65,6 +68,9 @@ Let's introduce an example to show how to implement a new custom element.
 
 <br/>
 
+**Custom Element.** Web API that allow to extend the HTML tag system creating new custom DOM elements that encapsulate functinalities away from the rest of the code. It refers to [encapsulation principle][encapsulation] of the software engineering.
+{: .notice--info}
+
 To define a new [v1 Custom Element][v0 to v1]:
 
 - create a ES6 class extending [`HTMLElement`][html element];
@@ -78,10 +84,8 @@ To define a new [v1 Custom Element][v0 to v1]:
   - [more examples][lifecycle hooks example]
 - events can be associated, as any other DOM element, using  [`EventTarget`][event target] method `addEventListener`.
 
-**Custom Element.** Web API that allow to extend the HTML tag system creating new custom DOM elements that encapsulate functinalities away from the rest of the code. It refers to [encapsulation principle][encapsulation] of the software engineering.
-{: .notice--info}
 
-## Shadow DOM Quick
+## Shadow DOM
 
 Shadow DOM is more or less like a *scoped subtree inside the Custom Element*{: .italic-red-text} that helps to build a new DOM element.
 
@@ -135,7 +139,7 @@ More examples are available on the [Web Components Github MDN repo][web componen
 <cite>Rob Wormald</cite>
 {: .small}
 
-**Pro Tip.** Angular Elements are self-bootstrapping, they host an _Angular Component_ inside a _Custom Element_ and their usage is not anymore tied to a specific framework.
+**Pro Tip.** Angular Elements are *Angular Components* packed as [*Custom Elements*][custom elements], part of the [*Web Components*][web components], a suite of Web platform APIs.
 {: .notice--info}
 
 **Angular Components** [act as a hosts][telerik angular elements] for **Custom Elements** mapping properties from the Angular world to the Web Platform API standard:
@@ -147,45 +151,18 @@ More examples are available on the [Web Components Github MDN repo][web componen
 
 Whereas *Inputs*{: .italic-red-text} rely on the Custom Elements lifecycle hook, *Outputs*{: .italic-red-text} rely on the Custom Event API (spec). Both APIs are entirely separate from each other.
 
-**[Dependency Injection.][telerik angular elements]** Angular Elements also let us take advantage of Angular's dependency injection. When we create a custom element using Angular Elements, we pass in a reference to the current module's injector. This injector lets us share context across multiple elements or use shared services.
+**Pro Tip.** Angular Elements are self-bootstrapping, they host an _Angular Component_ inside a _Custom Element_ and their usage is not anymore tied to a specific framework.
 {: .notice--info}
 
-**[Content Projection.][telerik angular elements]** We also get content projection (transclusion) with Angular Elements, with a couple of caveats. Content project works correctly when the page first renders, but not with dynamic content projection yet. As of now, we also don't yet have support for `ContentChild` or `ContentChildren` queries. Content projection should get more robust over time, though, and we'll also have the ability to use slots and the shadow DOM as browser support increases.
-{: .notice--info}
+**[Dependency Injection.][telerik angular elements]** Angular Elements also let us take advantage of Angular's dependency injection. When we create a custom element using Angular Elements, we pass in a reference to the current module's injector. This injector lets us share context across multiple elements or use shared services.
+
+**[Content Projection.][telerik angular elements]** We also get content projection (transclusion) with Angular Elements, but not with dynamic content projection yet. Content projection we'll have the ability to use slots and the shadow DOM as browser support increases.
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">PR for basic Shadow DOM v1 support in Angular - should make Elements more flexible, as you can now use &lt;slot&gt; elements to do basic content projection. <a href="https://t.co/SBwNBQmwwe">https://t.co/SBwNBQmwwe</a></p>&mdash; Rob Wormald (@robwormald) <a href="https://twitter.com/robwormald/status/1013121891941269504?ref_src=twsrc%5Etfw">June 30, 2018</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-## Angular Elements: where to use
 
-Angular Elements project has been revealed at the AngularConnect 2017 by Rob Worlmald
-
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Here&#39;s the slides from my Angular Elements talk @ <a href="https://twitter.com/hashtag/AngularConnect?src=hash&amp;ref_src=twsrc%5Etfw">#AngularConnect</a> - <a href="https://t.co/4kuySZ9zMs">https://t.co/4kuySZ9zMs</a></p>&mdash; Rob Wormald (@robwormald) <a href="https://twitter.com/robwormald/status/928250099054120960?ref_src=twsrc%5Etfw">November 8, 2017</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-Rob Wormald has recently defined three main areas of use for the Angular Elements during the [ng-conf 2018][where use angular elements]:
-
-### Elements in Apps
-
-- CMS embeds
-- Dynamic components
-- Server-side/hybrid rendering
-
-### Element Containers
-
-- Mini-apps
-- Micro-frontends
-- ngUpgrade
-- SharePoint
-
-### Resusable Widgets
-
-- Cross-framework compatibility
-- Material/CDK components in any environment
-- Design systems - build once, use anywhere
-
-**Note.** Some work has still to be done for reusable widgets.
-{: .notice--primary}
+## Angular Elements: not production ready yet
 
 Angular Elements is one of the Angular Labs projects where new experimental ideas are developed. The first release became part of Angular 6 and a  more refined version should arrive along with Angular 7. For the time being Angular Elements is not ready for production yet:
 
@@ -221,7 +198,7 @@ The latest command add both Angular Elements and the polyfill called [`document-
 - `@Input` for a property with a default value.
 - Some other properties.
 
-rename `bootstrap`to `entryComponents` in the `app.module.ts`to avoid the component bootstrap along with the module.
+rename `bootstrap`to `entryComponents` in the `app.module.ts` to avoid the component bootstrap along with the module.
 
 Now create the custom element
 
@@ -317,24 +294,12 @@ String.prototype.wasRegistered = function() {
 ```
 
 
-## Angular Components
-
-Components are the fundamental building block in a component-driven application architecture. They are ES6 classes having the `@Component` decorator on top.
- 
-> __Custom Elements__ are one of the key features of the Web Components standard to encapsulate functionalities on a HTML page. JavaScript APIs allow you to define custom elements and their behaviour to be then used in a user interface.
-
-> __Shadow DOM__ is part of Web Components technology suite to create resusable custom elements along with the _encapsulated functionalities_.
-
-## Angular Elements in 10 Steps
-
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">RT <a href="https://twitter.com/sulco?ref_src=twsrc%5Etfw">@sulco</a>: A lot of chatter about <a href="https://twitter.com/hashtag/Angular?src=hash&amp;ref_src=twsrc%5Etfw">#Angular</a> Elements lately! <a href="https://twitter.com/robwormald?ref_src=twsrc%5Etfw">@robwormald</a>’s and <a href="https://twitter.com/PascalPrecht?ref_src=twsrc%5Etfw">@PascalPrecht</a>’s talks got me energized, so I’ve done some tinkering &amp; created this 10 step guide to building your own: from `npm init -y` to the production build. Hope you find it useful! 🔨https://… <a href="https://t.co/YKRken80vr">pic.twitter.com/YKRken80vr</a></p>&mdash; Learn Vue.js (@LearnVuejs2) <a href="https://twitter.com/LearnVuejs2/status/1007957528326606849?ref_src=twsrc%5Etfw">June 16, 2018</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-https://medium.com/@tomsu/building-web-components-with-angular-elements-746cd2a38d5b
-
-
-
 ## Browser Support
+
+<iframe width="620" height="350" src="https://caniuse.com/#feat=custom-elementsv1" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
+
+
+### Recent News
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Great to hear that! Firefox 63 are getting Shadow DOM and Custom Elements.<a href="https://t.co/Hgp7HXx8r5">https://t.co/Hgp7HXx8r5</a></p>&mdash; Hayato (Shadow DOM) (@shadow_hayato) <a href="https://twitter.com/shadow_hayato/status/1029185633678315520?ref_src=twsrc%5Etfw">August 14, 2018</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -345,9 +310,6 @@ https://medium.com/@tomsu/building-web-components-with-angular-elements-746cd2a3
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Little hack for enabling shadow DOM V1 and slots in Angular Elements,  till we fix <a href="https://t.co/Q3F1LoUcGP">https://t.co/Q3F1LoUcGP</a> - <a href="https://t.co/vh4TRGbQTP">https://t.co/vh4TRGbQTP</a></p>&mdash; Rob Wormald (@robwormald) <a href="https://twitter.com/robwormald/status/1005613409486848000?ref_src=twsrc%5Etfw">June 10, 2018</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Here&#39;s the slides from my Angular Elements talk @ <a href="https://twitter.com/hashtag/AngularConnect?src=hash&amp;ref_src=twsrc%5Etfw">#AngularConnect</a> - <a href="https://t.co/4kuySZ9zMs">https://t.co/4kuySZ9zMs</a></p>&mdash; Rob Wormald (@robwormald) <a href="https://twitter.com/robwormald/status/928250099054120960?ref_src=twsrc%5Etfw">November 8, 2017</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 <!-- References -->
@@ -415,18 +377,3 @@ https://medium.com/@tomsu/building-web-components-with-angular-elements-746cd2a3
 
 <!-- Examples -->
 [dynamic dashboard]: https://t.co/DLlrTKpnfY
-
-<!-- Open Question -->
-<!--
-- are custom elements registered per tab or browser wise?
-- how unregister a custom element?
--->
-
-// web components
-
-// custom elements
-
-// browser compatibility
-
-#### Jargon
-_web components_, _custom elements_, _code reuse_, _encapsulation_
