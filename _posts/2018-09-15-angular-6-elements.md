@@ -27,6 +27,8 @@ Angular Elements project has been revealed at the AngularConnect 2017 by Rob Wor
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Here&#39;s the slides from my Angular Elements talk @ <a href="https://twitter.com/hashtag/AngularConnect?src=hash&amp;ref_src=twsrc%5Etfw">#AngularConnect</a> - <a href="https://t.co/4kuySZ9zMs">https://t.co/4kuySZ9zMs</a></p>&mdash; Rob Wormald (@robwormald) <a href="https://twitter.com/robwormald/status/928250099054120960?ref_src=twsrc%5Etfw">November 8, 2017</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
+**Presentation.** A [presentation](https://blackat.github.io/slides/head-first-angular-elements/index.html) about Angular Elements based on this post is also available.
+{: .notice--info}
 
 ## World of Custom Components
 
