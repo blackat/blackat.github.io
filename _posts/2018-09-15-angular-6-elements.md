@@ -175,7 +175,23 @@ Angular Elements is one of the Angular Labs projects where new experimental idea
   - [Mozilla][mozilla support] has an open bug to implement;
   - use [`@webcomponents/webcomponentsjs`][polyfill] loader to asynchronously load only the necessary polyfills required by the browser.
 
-## Create New Angular Elements Component
+## Angular Elements In Action
+
+The code used in this post is available on [GitHub](https://github.com/blackat/angular-geometry-elements).
+Following all the steps to reproduce the full workflow if you start from scratch.
+
+### Angular Elements Component Description
+
+The Angular Elements component will allow the user to select a CSS shape and, once the button will be pressed, an alert message will be displayed with the info of the selection made.
+
+The goal is to show how the input/output between an Angular Elements component and the vanilla JavaScript of the hosting page works. Basically the selection is captured by the component, the action connected with the submit button generates an event that communicate the selection made by the user to the external world.
+
+<figure class="half">
+    <a href="/assets/images/posts/angular-geometry-elements-example-1.png"><img src="/assets/images/posts/angular-geometry-elements-example-1.png"></a>
+    <a href="/assets/images/posts/angular-geometry-elements-example-2.png"><img src="/assets/images/posts/angular-geometry-elements-example-2.png"></a>
+    <figcaption>The final result: the user can select the desired CSS shape and then press the button submit.</figcaption>
+</figure>
+
 
 ### Setup the Project
 
@@ -190,7 +206,37 @@ The latest command add both Angular Elements and the polyfill called [`document-
 
 ### Create the Component
 
-/// put the code here
+Open and modify the file `app.component.ts` as follows:
+
+```javascript
+import { Component, ViewEncapsulation, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  encapsulation: ViewEncapsulation.Native
+})
+export class AppComponent implements OnInit {
+
+  @Input() defaultValue = 'square';
+
+  @Output() selectedValue = new EventEmitter<string>();
+
+  form: FormGroup;
+
+  ngOnInit(): void {
+    this.form = new FormGroup({
+      shape: new FormControl(this.defaultValue)
+    });
+  }
+
+  submit() {
+    this.selectedValue.emit(this.form.value);
+  }
+}
+```
 
 - `ViewEncapulation`: change the encapsulation strategy w.r.t. the styles are applied to the component:
   - `Native`: use the real Shadow DOM if natively available, otherwise the `web-components` polyfills are required to shim the behavior.
@@ -198,9 +244,44 @@ The latest command add both Angular Elements and the polyfill called [`document-
 - `@Input` for a property with a default value.
 - Some other properties.
 
-rename `bootstrap`to `entryComponents` in the `app.module.ts` to avoid the component bootstrap along with the module.
+In the file `app.module.ts` rename `bootstrap` to `entryComponents` to avoid the component bootstrap along with the module:
 
-Now create the custom element
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule, Injector } from '@angular/core';
+
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { createCustomElement } from '@angular/elements';
+
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule
+  ],
+  providers: [],
+  entryComponents: [AppComponent]
+})
+export class AppModule {
+
+  // The bridge between Angular and the Web API.
+  constructor(private injector: Injector) {
+    const el = createCustomElement(AppComponent, {injector});
+    customElements.define('geometry-elements', el);
+  }
+
+  ngDoBootstrap() {}
+
+}
+```
+
+Now focus on the constructor of the module:
 
 ```javascript
 constructor(private injector: Injector) {
@@ -214,7 +295,7 @@ this function returns a special class that can be used with the Custom Element W
 **Pro Tip.** The Angular Component now act as a host for the Custom Element.
 {: .notice--info}
 
-## Build and Pack the Angular Element Component
+### Build and Pack the Angular Element Component
 
 So  fare there is not a straight forward way to pack an Angular Element component, here some approaches proposed by [Sam Julien][telerik angular elements]:
 
@@ -229,7 +310,30 @@ Following the Sam Julien's advice the Node approach is choosen:
 npm install --save-dev concat fs-extra
 ```
 
-Create a file called `elements-build.js` at the root of the project with the recomended script. The script will combine what the Angular CLI has generated in a single file.
+Create a file called `elements-build.js` at the root of the project with the following script:
+
+```javascript
+const fs = require('fs-extra');
+const concat = require('concat');
+
+(async function build() {
+  const files = [
+    './dist/angular-geometry-elements/runtime.js',
+    './dist/angular-geometry-elements/polyfills.js',
+    './dist/angular-geometry-elements/scripts.js',
+    './dist/angular-geometry-elements/main.js'
+  ];
+
+  await fs.ensureDir('elements');
+  await concat(files, 'elements/geometry-elements.js');
+  await fs.copyFile(
+    './dist/angular-geometry-elements/styles.css',
+    'elements/styles.css'
+  );
+})();
+```
+
+The script will combine what the Angular CLI has generated in a single file.
 
 In the `package.json` add
 
@@ -237,15 +341,38 @@ In the `package.json` add
 "build:elements": "ng build --prod --output-hashing none && node elements-build.js"
 ```
 
-Then create the file `index.html` in the previously created folder `elements` to have a page where to test the new created component.
+Then create the file `index.html` in the previously created folder `elements` to have a page where to test the new created component:
 
-Fireup the build
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Angular Elements</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css"></head>
+  </head>
+  <body>
+    <geometry-elements id="el" default-value="circle"></geometry-elements>
+    <script type="text/javascript" src="geometry-elements.js"></script>
+    <script>
+      document.getElementById("el").addEventListener("selectedValue", function(value){
+        alert("Output from the component " + JSON.stringify(value.detail));
+      })
+    </script>
+  </body>
+</html>
+```
+
+#### Fireup the build
 
 ```bash
 npm run build:elements
 ```
 
-The output of the build is put in the `elements` folder 
+The output of the build is put in the `elements` folder:
 
 ```bash
 .
@@ -255,7 +382,7 @@ The output of the build is put in the `elements` folder
 ```
 
 **Note.** Style file is empty because of the `Native` strategy choice.
-{: .notice-info}
+{: .notice--info}
 
 ### Test The Angular Elements Component
 
@@ -293,11 +420,9 @@ String.prototype.wasRegistered = function() {
 //⇒ undefined
 ```
 
-
 ## Browser Support
 
 <iframe width="620" height="350" src="https://caniuse.com/#feat=custom-elementsv1" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
-
 
 ### Recent News
 
