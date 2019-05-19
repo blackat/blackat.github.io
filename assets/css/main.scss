@@ -5,18 +5,51 @@
 @charset "utf-8";
 
 // Custom Blue Style.
-// $cyan: #73C2FB !default;
-$link-color: #FFCC00; // #29AAE1 !default;
-
-// Background info block.
-// $info-color: #0E4D92 !default;
-
-// Colors
-// $gray: $info-color !default;
-// $primary-color: $info-color;
-
+$global-font-family: 'Source Sans Pro', sans-serif !important;
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
+
+body {
+    line-height: 26px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 16px;
+}
+
+/*************************
+    TOC sidebar 
+*************************/
+.svg-inline--fa {
+    margin-right: 5px;
+}
+
+.nav__title {
+    visibility: hidden;
+}
+
+.toc .nav__title {
+    background: none;
+    color: #6f777d;
+}
+
+.toc {
+    border: none;
+    border-radius: 0px;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.toc__menu a {
+    border: none;
+}
+
+.toc .active a {
+    background-color: transparent;
+    border-left: 2px solid $link-color;
+    color: $link-color;
+}
 
 .italic-red-text {
     color: #fd4445;
@@ -24,6 +57,9 @@ $link-color: #FFCC00; // #29AAE1 !default;
     font-style: normal;
 }
 
+/*************************
+    Notice 
+*************************/
 .notice--info {
     background-color: #FFCC00;
     color: #212A31;
@@ -45,127 +81,12 @@ $link-color: #FFCC00; // #29AAE1 !default;
     }
 }
 
-blockquote {
-    border-left: 0.25em solid #FFCC00;
-}
 
-.notice--primary {
-    color: white;
-    background: #3F1F1F;
-}
+/*************************
+    Avatar
+*************************/
 
-li code, p code {
-    background: lightslategrey;
-    color: white;
-}
 
-.nav__title {
-    background: #FFCC00 !important;
-    color: #212A31 !important;
-}
-
-.greedy-nav a {
-    color: #FFCC00;
-}
-
-.author__avatar {
-  
-    img {
-      max-width: 110px;
-      border-radius: 50%;
-      background-color: white;
-      border: 4px solid #FFCC00 !important;
-  
-      @include breakpoint($large) {
-        padding: 15px;
-        border: 1px solid $border-color;
-      }
-    }
-  }
-
-  a:hover {
-    color: #f90 !important;
-}
-
-a:visited {
-    color: #FFCC00;
-}
-
-.pagination li a.current, .pagination li a.current.disabled {
-    color: #212A31;
-    background: #FFCC00;
-}
-
-/* dark syntax highlighting (base16) */
-$base00: black !important;
-$base01: #e0e0e0 !default;
-$base02: #d0d0d0 !default;
-$base03: #b0b0b0 !default;
-$base04: #000000 !default;
-$base05: #101010 !default;
-$base06: #151515 !default;
-$base07: #202020 !default;
-$base08: #ff0086 !default;
-$base09: #fd8900 !default;
-$base0a: #aba800 !default;
-$base0b: lightgray !important;
-$base0c: lightgray !important;
-$base0d: #3777e6 !default;
-$base0e: #f90 !default;
-$base0f: #cc6633 !default;
-
-div.highlight {
-    font-size: 0.8em
-}
-
-.highlight code {
-    color: white;
-}
-
-div.highlighter-rouge {
-    background: black;
-}
-
-.highlight .k {
-    color: white;
-}
-
-.highlight .p {
-    color: white;
-}
-
-.highlight .o {
-    color: white;
-}
-
-.highlight .nb {
-    color: white;
-}
-
-.highlight .nt {
-    color: white;
-}
-
-.highlight .kd {
-    color: #FFCC00;
-}
-
-.highlight .nv {
-    color: #FFCC00;
-}
-
-.highlight .nx {
-    color: white;
-}
-
-.highlight .s2 {
-    color: lightgray;
-}
-
-.highlight .s1 {
-    color: lightgray;
-}
-
-.highlight .na {
-    color: #f90;
-}
+/*************************
+    Code Block
+*************************/

@@ -1,12 +1,11 @@
 ---
-title: "Factory Pattern"
-permalink: /docs/java-design-patterns/factory-pattern/
-excerpt: "."
-last_modified_at: 2017-11-15T09:49:52-05:00
+title: "Factory pattern"
+permalink: /design-patterns/factory-pattern/
+excerpt: "How the theme is organized and what all of the files are for."
+last_modified_at: 2018-03-20T15:19:22-04:00
 categories: [design patterns, creational patterns, java]
 toc: true
-toc_label: "on this page"
-toc_icon: "list"
+toc_sticky: true
 ---
 
 ## In a Nutshell
@@ -235,5 +234,3 @@ public class SportCarManufacturer extends AbstractCarManufacturer {
 * __Comparison.__
     * __Abstract factory__ creates a _family or set of products_.
     * __Method factory__ creates a _single product_.
-
-

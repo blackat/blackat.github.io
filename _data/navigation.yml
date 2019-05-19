@@ -3,20 +3,62 @@ main:
   - title: "Posts"
     url: /year-archive/
   - title: "Design Patterns"
-    url: /docs/landing
+    url: /design-patterns/design-patterns/
   - title: "VS Code"
-    url: /docs/vs-code
+    url: /vscode/plugins/
 
-# documentation links
-docs:
+# design patterns links
+design-patterns:
   - title: Design Patterns
     children:
-      - title: "Java"
-        url: /docs/java-design-patterns/landing/
-      #- title: "JavaScript"
-      #  url: /docs/javascript-design-patterns/
-      #- title: "Installation"
-      #  url: /docs/installation/
-      #- title: "Upgrading"
-      #  url: /docs/upgrading/
+      - title: "Creational patterns"
+        url: /design-patterns/creational-patterns/
+  - title: "Creational patterns"
+    children:
+      - title: "Factory pattern"
+        url: /design-patterns/factory-pattern/
+      - title: "Singleton pattern"
+        url: /design-patterns/singleton-pattern/
+  - title: "Structural patterns"
+    children:
+      - title: "Decorator pattern"
+        url: /design-patterns/decorator-pattern/
+      - title: "Composite pattern"
+        url: /design-patterns/composite-pattern/
+      - title: "Proxy pattern"
+        url: /design-patterns/proxy-pattern/
+      - title: "Protection proxy pattern"
+        url: /design-patterns/protection-proxy-pattern/
+      - title: "Remote proxy pattern"
+        url: /design-patterns/remote-proxy-pattern/
+      - title: "Virtual proxy pattern"
+        url: /design-patterns/virtual-proxy-pattern/
+      - title: "Adapter pattern"
+        url: /design-patterns/adapter-pattern/
+      - title: "Facade pattern"
+        url: /design-patterns/facade-pattern/
+  - title: "Behavioral patterns"
+    children:
+      - title: "Iterator pattern"
+        url: /design-patterns/iterator-pattern/
+      - title: "Observer pattern"
+        url: /design-patterns/observer-pattern/
+      - title: "Strategy pattern"
+        url: /design-patterns/strategy-pattern/
+      - title: "Template pattern"
+        url: /design-patterns/template-pattern/
+      - title: "Command pattern"
+        url: /design-patterns/command-pattern/
+  - title: "Other known patterns"
+    children:
+      - title: "MVC pattern"
+        url: /design-patterns/mvc-pattern/
+
+# vs-code links
+vscode:
   - title: VS Code
+    children:
+      - title: "Plugins"
+        url: /vscode/plugins/
+      - title: "Cheatsheet"
+        url: /vscode/cheatsheet/

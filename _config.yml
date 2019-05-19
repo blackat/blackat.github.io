@@ -16,7 +16,7 @@
 
 # Remote theme
 remote_theme: "mmistakes/minimal-mistakes"
-minimal_mistakes_skin    : "dark" #"default" "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+minimal_mistakes_skin    : "default" #"air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
 locale: en-GB
@@ -71,6 +71,8 @@ plugins:
   - jekyll-gist
   - jekyll-feed
   - jekyll-remote-theme
+  - jemoji
+  - jekyll-include-cache
 
 # mimic GitHub Pages with --safe
 whitelist:
@@ -137,7 +139,10 @@ tag_archive:
 
 # Collections
 collections:
-  docs:
+  design-patterns:
+    output: true
+    permalink: /:collection/:path/
+  vscode:
     output: true
     permalink: /:collection/:path/
 
@@ -151,20 +156,20 @@ defaults:
       layout: single
       author_profile: true
       read_time: true
-      comments: true
+      comments: false
       share: true
       related: true
   # _pages
   - scope:
-      path: ""
+      path: "_pages"
       type: pages
     values:
       layout: single
       author_profile: true
-  # _docs
+  #design-patterns
   - scope:
-      path: ""
-      type: docs
+      path: "_design-patterns"
+      type: design-patterns
     values:
       layout: single
       read_time: false
@@ -172,4 +177,16 @@ defaults:
       share: false
       comments: false
       sidebar:
-        nav: "docs"
+        nav: "design-patterns" #reference the name in navigation.yml, add to collections as well.
+  # _vscode
+  - scope:
+      path: "_vscode"
+      type: vscode
+    values:
+      layout: single
+      read_time: false
+      author_profile: false
+      share: false
+      comments: false
+      sidebar:
+        nav: "vscode"
