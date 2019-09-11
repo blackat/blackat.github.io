@@ -12,8 +12,52 @@ toc_sticky: true
 <cite>Bates and Sierra</cite> --- [Head First Design Patterns](http://shop.oreilly.com/product/9780596007126.do)
 {: .small}
 
-##Class diagram
-/images/posts/design-patterns/observer_pattern.png
+## Real life example: magazine subscription
+
+Subscribe to a magazine (*publisher*), for instance The New Yorker, via an electonic device:
+
+- every time a new issue is released it is push to you, you don't have to poll or to ask for it;
+- once you are not interested anymore just unsubscribe to not get anymore any new issue.
+
+Publishers and subscribers make the *Observer pattern*.
+
+## Set the jargon
+
+- the publisher is the *subject*;
+- the seubscribers are the *observers*;
+- subjects and observers can interact with little knowledge of each other, they are *loosely coupled*.
+
+## Pilot project
+
+A pilot project is something we can use to explain how to arrive to the Observer Pattern.
+
+Consider a Single Board Computer (Raspberry pi, LattePanda, etc) equipped with sensors to monitor some parameters of a room such as temperature, humidity, light and so on. Each room is monitored by one SBC.
+
+Data can be retrieved by another SBC for instance, or by an application that provides display functionality.
+
+### Apply designing principles
+
+#### Encapsulate what varies
+
+There are *two areas of change*:
+
+- each SBC could have different sensors;
+- the observers of sensor data could be different.
+
+*Encapsulate what varies* so that objects can interact having little knowledge of each other. The *subject* as the *observers* need to know just the minimal amount of information to exchange data. 
+
+#### Program to an interface, not to an implementation
+
+*Interface* represents the minimal amount of knowledge an object needs to know about the other. Observers don't need to know a lot about the subject but only how to register and unregister. A subject just need to know how to send data to an
+observer and not how the observer is done.
+
+#### Strive for loosely coupled designs between objects that interact
+
+Interfaces allow to minimize the interdependency between objects, objects can change without affecting the others. Such a OO system is flexible, can evolve and can live longer without massive redesign.
+
+## Class diagram
+
+<img src="/assets/images/design-patterns/java/observer_pattern.png">
 
 Use `Subject` interface to register or remove an observer. A potential _observer_ must implements the `Observer` interface, its method will be called when the _subject's_ state changes.
 

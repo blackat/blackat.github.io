@@ -22,6 +22,7 @@ minimal_mistakes_skin    : "default" #"air", "aqua", "contrast", "dark", "dirt",
 locale: en-GB
 title: black@t
 title_separator: "-"
+subtitle: "A passionate blog"
 email: eugenio_lentini@fastmail.fm
 description: >- # this means to ignore newlines until "baseurl:"
   Write an awesome description for your new site here. You can edit this
@@ -97,6 +98,9 @@ include: ["_pages"]
 #   - vendor/gems/
 #   - vendor/ruby/
 
+encoding: "utf-8"
+markdown_ext: "markdown,mkdown,mkdn,mkd,md"
+
 # HTML Compression
 # - http://jch.penibelst.de/
 compress_html:
@@ -156,7 +160,7 @@ defaults:
       layout: single
       author_profile: true
       read_time: true
-      comments: false
+      comments: #true
       share: true
       related: true
   # _pages
