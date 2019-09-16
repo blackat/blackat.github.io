@@ -15,7 +15,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-weight: 400;
-    font-size: 16px;
+    font-size: 20px;
 }
 
 /*************************
@@ -56,37 +56,3 @@ body {
     font-weight: 600;
     font-style: normal;
 }
-
-/*************************
-    Notice 
-*************************/
-.notice--info {
-    background-color: #FFCC00;
-    color: #212A31;
-
-    a {
-        color: #212A31 !important;
-    }
-
-    strong, em {
-        color: #212A31;
-    }
-
-    strong a {
-        color: #212A31;
-    }
-
-    code {
-        background: #212A31;
-    }
-}
-
-
-/*************************
-    Avatar
-*************************/
-
-
-/*************************
-    Code Block
-*************************/

@@ -14,35 +14,43 @@ toc_icon: "list"
 toc_sticky: true
 ---
 
-## Why modules?
+## Why modules
 
-Modular programming is a software design technique to facilitate the construction of large software programs by _decoupling_ it into small _loose coupled_ modules.
+__Modular programming__ is a software design technique to facilitate the construction of large software programs by _decoupling_ it into small _loose coupled_ modules.
 
 A __module__ is an independent and autonomous unit that provides a _functionality_. In order to exploit the functionality the module exposes an interface to simplify the usage and hide the implementation details.
 
 Key concepts of module are:
 
-- separation of concerns: different from monolithic design, separation in units w.r.t. the functionality
-- hidden implementation details: interact via the _elements exposed in the interface_, not tight to a specific implementation
-- interaction through well-defined interfaces: easier to exploit a functionality, _abstract_ from implementation details
-- reusability: being an autonomous and independent unit of work can be used elsewhere
-- independent and interchangeable units: can be tested in isolation, easier to spot issues, can be substituted if required.
+- __separation of concerns:__ different from monolithic design, separation in units w.r.t. the functionality;
+- __hide implementation details:__ interact via the _elements exposed in the interface_, not tight to a specific implementation;
+- __interaction through well-defined interfaces:__ easier to exploit a functionality, _abstract_ from implementation details;
+- __reusability:__ being an autonomous and independent unit of work can be used elsewhere, a [simple API encourages reusability](https://ponyfoo.com/books/practical-modern-javascript#toc);
+- __independent and interchangeable units:__ can be tested in isolation, easier to spot issues, can be substituted if required.
 
 Concepts like `module`, `package`, `component` and `assembly` vary a lot among lanaguages.
 
-/// todo: previous of ESM there were some module variations or object [literal pattern](http://rmurphey.com/blog/2009/10/15/using-objects-to-organize-your-code)
-
-
 ### Export and import
 
-__Export__ and __import__ are really the most important operation when we talk about module:
+__Export__ and __import__ are really the most important operations when we talk about module:
 
-`export`: a module implement a functionality and _export_ and interface to use it;
-`import`: who wants to use the functionality has to _import_ the _elements_ defined in the interface.
+- `export`: a module implement a functionality and _export_ and interface to use it;
+- `import`: who wants to use the functionality has to _import_ the _elements_ defined in the interface.
+
+### JavaScript and global scope
+
+JavaScript is _"affected by the global scope syndrome"_, everything belongs to the `global` scope. Arise then the need to:
+
+- partition this space;
+- keep some stuff secret;
+- to expose only a minimal list of elements;
+- to avoid names clashing.
+
+/// todo: previous of ESM there were some module variations or object [literal pattern](http://rmurphey.com/blog/2009/10/15/using-objects-to-organize-your-code)
 
 ## JavaScript <script>
 
-In the past the only way to separate a program in small pieces was using `<script>` to load via HTML file a piece of code into the _global space_.
+In the past the only way to separate a program in small pieces was using `<script>` to load via a HTML file a piece of code into the _global space_. For instance we load the application `app.js` thta depends on `module-two.js` tha, in turn, depends on `module-one.js`:
 
 ```html
 <script src="module-one.js"></script>
@@ -50,7 +58,7 @@ In the past the only way to separate a program in small pieces was using `<scrip
 <script src="app.js"></script>
 ```
 
-A common JavaScript pattern, pre ES6 (not buit-in modules, no `let`, no `const`), to create a module is the use of __IIFE (Immediately Invoking Function Expression)__, a function tra wraps a _code fragment_ and it is invoked in the last line.
+A common JavaScript pattern, pre ES6 (not buit-in modules, no `let`, no `const`), to create a module is the use of __[IIEF](https://benalman.com/news/2010/11/immediately-invoked-function-expression) (Immediately Invoking Function Expression - Ben Alman)__, a function tath wraps a _code fragment_ and it is invoked in the last line.
 
 ```javascript
 var moduleTwo = (function () {
@@ -77,15 +85,22 @@ var moduleTwo = (function () {
 })();
 ```
 
-Basically an IIEF (Ben Alman) is the way of wrapping a code fragment, it is automatically invoked in the last line `();` and assigned to the _global variable_ `moduleTwo`.
+An IIFE is a _function definition_ that immediately calls itself in the last line `();` and creates a _new scope (function-scoped)_ along with a _private space_. The interface is assigned to the _global variable_ `moduleTwo`, the _namespace_, usable by all. The namespace to invoke the public API and the private space to hide the logic of the module.
 
-IIEF is also a way of _creating a new scope (function-scoped)_ to decide what to hide and what to show but also to _reduce name clashing_ among functions. This approach has some __drawbacks__:
+__Pro Tip.__ Think about the first paranthesis of the IIFE `(` as a shield to protect the logic, and the _anonymous object literal_ `return` as the interface _export_. The `var moduleTwo` implicitly _imports_ the visibile elements make them available in the global scope.
+{: .notice--info}
 
-- import/export functionality relies on global variables and this increase the possibility of name clashes;
-- a script does not explicitly load the dependencies it depends on, so the developer has to list in the proper order all the direct and indirect dependencies
+### Drawbacks
+
+This approach has some drawbacks:
+
+- import/export functionality relies on _global variables_ and this increase the possibility of name clashes;
+- a script does not _explicitly load_ the dependencies it depends on, so the developer has to list in the proper order all the direct and indirect dependencies;
 - scripts are _synchronous_.
 
-Scripts cannot import module declaratively, the programmatic module loader API must be use exploiting a new variant of `<script>`:
+### EcmaScript 6
+
+In ES6 scripts cannot import module declaratively, the _programmatic module loader API_ must be use exploiting a new variant of `<script>`:
 
 ```javascript
 <script type="module">
@@ -101,12 +116,172 @@ Scripts cannot import module declaratively, the programmatic module loader API m
 
 This new flavour of `<script>` brings module support to old browsers via a polyfill.
 
+### Revealing Module Pattern (RMP)
+
+This pattern just explained is called [Revealing Module Pattern][todd-motto] since it _"reveals the public pointers to methods inside the Module's scope"_.
+
+## TypeSscript namespace
+
+TypeScript defines the concept of [`namespace`](https://www.typescriptlang.org/docs/handbook/namespaces.html) to make the definition of modules simpler. For instance
+
+```javascript
+namespace module {
+    var cat = {
+        name: "crazy cat",
+        meow: "meoooooooow"
+    };
+
+    function _private() {
+        // do some stuff privately
+    }
+
+    export function name() {
+        return cat.name;
+    }
+
+    export function meow() {
+        return cat.meow;
+    }
+}
+```
+
+that is traslated in ES5 code level as:
+
+```javascript
+"use strict";
+var module;
+(function (module) {
+    var cat = {
+        name: "crazy cat",
+        meow: "meoooooooow"
+    };
+    function _private() {
+        // do some stuff privately
+    }
+    function name() {
+        return cat.name;
+    }
+    module.name = name;
+    function meow() {
+        return cat.meow;
+    }
+    module.meow = meow;
+})(module || (module = {}));
+```
+
+Open a browser debugger and copy/paste the code in the console, invoke the public function:
+
+```javascript
+> module.meow()
+> "meoooooooow"
+```
+
+### More complex namespace
+
+We can easily define more complex namespaces such as:
+
+```javascript
+namespace module.cats {
+    var cat = {
+        name: "crazy cat",
+        meow: "meoooooooow"
+    };
+
+    function _private() {
+        // do some stuff privately
+    }
+
+    export function name() {
+        return cat.name;
+    }
+
+    export function meow() {
+        return cat.meow;
+    }
+}
+
+namespace module.dogs {
+    var dog = {
+        name: "crazy dog",
+        bau: "bauuuuuuuuu"
+    };
+
+    function _private() {
+        // do some stuff privately
+    }
+
+    export function name() {
+        return dog.name;
+    }
+
+    export function bau() {
+        return dog.bau;
+    }
+}
+```
+
+and it is translated in ES5 code level into:
+
+```javascript
+"use strict";
+var module;
+(function (module) {
+    var cats;
+    (function (cats) {
+        var cat = {
+            name: "crazy cat",
+            meow: "meoooooooow"
+        };
+        function _private() {
+            // do some stuff privately
+        }
+        function name() {
+            return cat.name;
+        }
+        cats.name = name;
+        function meow() {
+            return cat.meow;
+        }
+        cats.meow = meow;
+    })(cats = module.cats || (module.cats = {}));
+})(module || (module = {}));
+(function (module) {
+    var dogs;
+    (function (dogs) {
+        var dog = {
+            name: "crazy dog",
+            bau: "bauuuuuuuuu"
+        };
+        function _private() {
+            // do some stuff privately
+        }
+        function name() {
+            return dog.name;
+        }
+        dogs.name = name;
+        function bau() {
+            return dog.bau;
+        }
+        dogs.bau = bau;
+    })(dogs = module.dogs || (module.dogs = {}));
+})(module || (module = {}));
+```
+
+As before, in the browser debugger console copy/paste the ES5 code and invoke the public functions as:
+
+```javascript
+> module.cats.meow()
+> "meoooooooow"
+> module.dogs.bau()
+> "bauuuuuuuuu"
+```
+
 ## Custom module systems (client and server side)
 
-Due to the lacking of a built-in module system, two custom ones arised:
+Due to the lacking of a built-in module system in ES6 previous versions, two custom ones arised:
 
-- CommonsJS to target the server side (node.js)
-- AMD (Asynchronous Module Defintion) _format_ to target the client side.
+- CommonsJS to target the _server side_ (node.js)
+- AMD (Asynchronous Module Defintion) _format_ to target the _client side_.
 
 ### CommonsJS modules
 
@@ -139,6 +314,11 @@ Pretty much the same except that:
 - it does not rely on any global variable
 - a module system will load and execute _synchronously_ the code wrapped by the modules
 - each module imports its own dependencies that are loaded in a chain, no more explicit loading.
+
+In CommonsJS every file is a module, each module has an _implicit_ local scope. CommonsJS modules import dependencies dynamically via _asynchronous_ function calls.
+
+__Pro Tip.__ Explore the contante of the global variable `module` to see how the module system manages the modules using `console.log(module)` from the main file that imports the module.
+{: .notice--info}
 
 ### AMD module format
 
@@ -182,7 +362,7 @@ All of the implementations are quite similar:
 - modules are _singletons_, it does not matter how many time a module is imported, only one instance exists
 - a module system does not relies anymore on _global variables_.
 
-### ECMASscript 6 modules
+### Native ECMASscript 6 Modules (ESM)
 
 ES6 module or ESM take the best from the two worlds, CommonJs and AMD, and they are characterized by:
 
@@ -227,3 +407,6 @@ old
 https://exploringjs.com/es6/ch_modules.html
 https://www.sitepoint.com/using-es-modules/
 https://github.com/tc39/
+
+---
+[todd-motto]: https://ultimatecourses.com/blog/mastering-the-module-pattern
