@@ -14,113 +14,200 @@ toc_icon: "list"
 toc_sticky: true
 ---
 
+Modular programming is a cross-language design technique to build large softwares. It allows the reuse of functionalities via interfaces.
+
+JavaScript is affected by the _global scope syndrome_ so different patterns have been developed during the years to partition this scope. Modules evolved from the first rudimentary solutions to module loaders both server side and frontend side, till the ESM (ECMAScript Module) that standardize how modules are loaded by a _modern browser_.
+
+## Lingo
+
+- _Loosely coupled:_ the use of interfaces hides the implementation details, so two units are not tighly linked by the specific implementation.
+- _Expose/export:_ the way to make interface elements visible to the outside of the world.
+- _Use/import:_ the way the outside world can see and use the exported interface elements of a module.
+- _Module:_ independent and autonomous unit of work.
+- _Unit of work:_ limited set of functionalities related to a specific domain and/or field.
+- _Interface:_ the _"handle"_ to use a module, a set of elements (functions, objects, arrays and values) exposed to the external world, _simply the API_. It could be also seen as the _documentation_ of the module.
+- _Function scope:_ private space of each function, everything defined within it is invisible outside.
+
 ## Why modules
 
-__Modular programming__ is a software design technique to facilitate the construction of large software programs by _decoupling_ it into small _loose coupled_ modules.
+__Modular programming__ is a software design technique that facilitates the construction of large software programs by _decoupling_ them into small _loosely coupled_ modules.
 
-A __module__ is an independent and autonomous unit that provides a _functionality_. In order to exploit the functionality the module exposes an interface to simplify the usage and hide the implementation details.
+A __module__ is an _independent and autonomous_ unit that provides a _functionality_. In order to use this functionality the _module exposes an interface_ to document the usage and hide the implementation details.
 
-Key concepts of module are:
+The key concepts of module are:
 
-- __separation of concerns:__ different from monolithic design, separation in units w.r.t. the functionality;
-- __hide implementation details:__ interact via the _elements exposed in the interface_, not tight to a specific implementation;
-- __interaction through well-defined interfaces:__ easier to exploit a functionality, _abstract_ from implementation details;
+- __separation of concerns:__ separation in units based on the functionality, better organized than monolithic design;
+- __interaction through well-defined interfaces:__ interface _abstracts_ from implementation details that are _hidden_;
 - __reusability:__ being an autonomous and independent unit of work can be used elsewhere, a [simple API encourages reusability](https://ponyfoo.com/books/practical-modern-javascript#toc);
-- __independent and interchangeable units:__ can be tested in isolation, easier to spot issues, can be substituted if required.
+- __independent and interchangeable units:__ can be tested in isolation, easier to spot issues and can be substituted if required.
 
-Concepts like `module`, `package`, `component` and `assembly` vary a lot among lanaguages.
+__Warning:__ concepts like `module`, `package`, `component` and `assembly` vary a lot among lanaguages.
+{: .notice--warning}
 
 ### Export and import
 
-__Export__ and __import__ are really the most important operations when we talk about module:
+_Export_ and _import_ are really the most important operations when we talk about modules:
 
-- `export`: a module implement a functionality and _export_ and interface to use it;
-- `import`: who wants to use the functionality has to _import_ the _elements_ defined in the interface.
+- __export__ means that a module implements a functionality and _export_ the interface to use it, the API;
+- __import__ means that anybody wants to use the functionality has to _import_ the _elements_ defined in the interface.
 
-### JavaScript and global scope
+### JavaScript module implementation options
 
-JavaScript is _"affected by the global scope syndrome"_, everything belongs to the `global` scope. Arise then the need to:
+There are several options to modularize an application:
 
-- partition this space;
+- Global modules
+- Object literal notation
+- The Module pattern
+- AMD modules
+- CommonJS modules
+- ECMAScript Modules (ESM)
+
+## JavaScript and global scope syndrome
+
+JavaScript is _"affected by the global scope syndrome:"_ everything belongs to the `window` or `global` object that means global scope. To organize the software program then we need to:
+
+- partition this space/object;
 - keep some stuff secret;
-- to expose only a minimal list of elements;
-- to avoid names clashing.
+- expose only a minimal list of elements;
+- avoid names clashing.
 
-/// todo: previous of ESM there were some module variations or object [literal pattern](http://rmurphey.com/blog/2009/10/15/using-objects-to-organize-your-code)
+### First attempt: the script tag
 
-## JavaScript <script>
+Before ES6 (not buit-in modules, no `let`, no `const`) the only way to separate a program in small pieces was using the `<script>` tag to load via a HTML files pieces of code into the _global space_. Each file was a module.
 
-In the past the only way to separate a program in small pieces was using `<script>` to load via a HTML file a piece of code into the _global space_. For instance we load the application `app.js` thta depends on `module-two.js` tha, in turn, depends on `module-one.js`:
+ A common JavaScript pattern to create a module was to make use of [IIEF](https://benalman.com/news/2010/11/immediately-invoked-function-expression) (pronounced _iffy_), _Immediately Invoking Function Expression_.
+
+>In JavaScript, every function, when invoked, creates a new execution context. Because variables and functions defined within a function may only be accessed inside, but not outside, that context, invoking a function provides a very easy way to create privacy.
+
+<cite>Ben Alman</cite> - Immediately-Invoked Function Expression (IIFE), 2010
+{: .small}
+
+ An IIEF is then a function that wraps a _code fragment_ and it is invoked in the last line.
+
+#### Example
+
+The application `app.js` depends on `module-two.js` then, in turn, depends on `module-one.js`:
 
 ```html
-<script src="module-one.js"></script>
-<script src="module-two.js"></script>
-<script src="app.js"></script>
+<html>
+  <head>
+    <script src="module-one.js"></script>
+    <script src="module-two.js"></script>
+    <script src="app.js"></script>
+  </head>
+  <body>...</body>
+</html>
 ```
-
-A common JavaScript pattern, pre ES6 (not buit-in modules, no `let`, no `const`), to create a module is the use of __[IIEF](https://benalman.com/news/2010/11/immediately-invoked-function-expression) (Immediately Invoking Function Expression - Ben Alman)__, a function tath wraps a _code fragment_ and it is invoked in the last line.
 
 ```javascript
-var moduleTwo = (function () {
-
-  // Import interface elements using global variable.
-  var importedFunctionOne = moduleOne.importedFunctionOne;
-
-  // Body of the module.
-  function internalFunction() {
-    // do something
-  }
-
-  // Re-export a function from another module and expose a local function.
-  function interfaceFunction() {
-    importedFunctionOne();
-    internalFunction();
-  }
-
-  // Export assigning function to the global variable moduleTwo.
-  return {
-    interfaceFunction: interfaceFunction
-  };
-
-})();
+var moduleOne = (function(x, y) {
+    // Body of the module.
+    function sum(x, y) {
+      return x + y;
+    }
+  
+    function diff(x, y) {
+      return x - y;
+    }
+  
+    // Export assigning function to the global variable moduleOne.
+    return {
+      sum: sum,
+      diff: diff
+    };
+  })();
 ```
 
-An IIFE is a _function definition_ that immediately calls itself in the last line `();` and creates a _new scope (function-scoped)_ along with a _private space_. The interface is assigned to the _global variable_ `moduleTwo`, the _namespace_, usable by all. The namespace to invoke the public API and the private space to hide the logic of the module.
+An IIFE is a _function expression_ that immediately gets invoked in the last line `();` and creates a _new scope (function-scoped)_ along with a _private space_. The interface is assigned to the _global variable_ `moduleOne`, the _namespace_, usable by all. The namespace allows then to invoke the public API and to hide the logic of the module.
 
-__Pro Tip.__ Think about the first paranthesis of the IIFE `(` as a shield to protect the logic, and the _anonymous object literal_ `return` as the interface _export_. The `var moduleTwo` implicitly _imports_ the visibile elements make them available in the global scope.
+__Pro Tip.__ Think about the first paranthesis of the IIFE `(` as a shield to protect the logic, and the _anonymous object literal_ `return` as the interface _export_.
 {: .notice--info}
 
-### Drawbacks
+The second module defined as IIEF get `moduleOne` as parameters since it is global and re-export some functions.
+
+```javascript
+var moduleTwo = (function(x, y) {
+  // Body of the module.
+  function prod(x, y) {
+    return x * y;
+  }
+
+  function quot(x, y) {
+    return x / y;
+  }
+
+  // Export and re-export assigning function to the global variable moduleTwo.
+  return {
+    sum: moduleOne.sum,
+    diff: moduleOne.diff,
+    prod: prod,
+    quot: quot
+  };
+})(moduleOne);
+```
+
+__Pro Tip.__ The `var moduleTwo` implicitly _imports_ the visibile elements from `moduleOne` and make them available in the global scope. The module argument mitigate the indirect dependency import issue.
+{: .notice--info}
+
+Finally the application use the functionalities from the module.
+
+```javascript
+console.log("Loading application...");
+
+// Import all the arithmetic operations, exported and re-exported.
+var ops = moduleTwo;
+console.log("Sum of 1 and 2 is: ", ops.sum(1,2));
+console.log("Difference between 6 and 2 is: ", ops.diff(6,2));
+console.log("Multiplication of 4 by 2 is: ", ops.prod(4,2));
+console.log("Division of 9 by 3 is: ", ops.quot(9,3));
+```
+
+#### Drawbacks
 
 This approach has some drawbacks:
 
-- import/export functionality relies on _global variables_ and this increase the possibility of name clashes;
-- a script does not _explicitly load_ the dependencies it depends on, so the developer has to list in the proper order all the direct and indirect dependencies;
+- _import/export functionality_ relies on _global variables_ and this increase the possibility of name clashes;
+- a script does not _explicitly load_ the dependencies it depends on, so the developer has to list in the _proper order_ all the direct and indirect dependencies;
 - scripts are _synchronous_.
 
-### EcmaScript 6
+### Second attempt: the Object Literal pattern
 
-In ES6 scripts cannot import module declaratively, the _programmatic module loader API_ must be use exploiting a new variant of `<script>`:
+The object literal notation is a list of _name/value pairs_ enclosed by curly brackets. It is way to create an object and assign it some properties like: functions, objects, array etc. The property names are the _interface elements_ exposed by the module. The object is the module and viceversa.
+
+Rebecca Murphey has written an in depth [post](http://rmurphey.com/blog/2009/10/15/using-objects-to-organize-your-code)
+
+#### Example: object literal notation
+
+The `moduleOne` is just an object that exposes some functionality hiding the implementation details.
 
 ```javascript
-<script type="module">
-  // Implicitly in strict mode.
-  import * from 'lib/moduleOne';
+var moduleOne = {
+  // Body of the module.
+  sum: function sum(x, y) {
+    return x + y;
+  },
 
-  // Some variable local to the module scope,
-  // not a property of the global object such as window in browsers.
-  var greeting = "hello";
-  ...
-</script>
+  diff: function diff(x, y) {
+    return x - y;
+  }
+};
+
+moduleOne.sum(1, 2);
+moduleOne.diff(4, 3);
 ```
 
-This new flavour of `<script>` brings module support to old browsers via a polyfill.
+https://addyosmani.com/resources/essentialjsdesignpatterns/book/#revealingmodulepatternjavascript
 
 ### Revealing Module Pattern (RMP)
 
-This pattern just explained is called [Revealing Module Pattern][todd-motto] since it _"reveals the public pointers to methods inside the Module's scope"_.
+The [Revealing Module Pattern][todd-motto] is so called since it _"reveals the public pointers to methods inside the Module's scope"_.
 
-## TypeSscript namespace
+This pattern has been designed to emulate the concept of a class as put in evidence by [Addy Osmani](https://addyosmani.com/resources/essentialjsdesignpatterns/book/#revealingmodulepatternjavascript)
+
+http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
+
+
+## TypeScript namespace
 
 TypeScript defines the concept of [`namespace`](https://www.typescriptlang.org/docs/handbook/namespaces.html) to make the definition of modules simpler. For instance
 
@@ -276,6 +363,24 @@ As before, in the browser debugger console copy/paste the ES5 code and invoke th
 > "bauuuuuuuuu"
 ```
 
+### EcmaScript 6
+
+In ES6 scripts cannot import module declaratively, the _programmatic module loader API_ must be use exploiting a new variant of `<script>`:
+
+```javascript
+<script type="module">
+  // Implicitly in strict mode.
+  import * from 'lib/moduleOne';
+
+  // Some variable local to the module scope,
+  // not a property of the global object such as window in browsers.
+  var greeting = "hello";
+  ...
+</script>
+```
+
+This new flavour of `<script>` brings module support to old browsers via a polyfill.
+
 ## Custom module systems (client and server side)
 
 Due to the lacking of a built-in module system in ES6 previous versions, two custom ones arised:
@@ -317,7 +422,9 @@ Pretty much the same except that:
 
 In CommonsJS every file is a module, each module has an _implicit_ local scope. CommonsJS modules import dependencies dynamically via _asynchronous_ function calls.
 
-__Pro Tip.__ Explore the contante of the global variable `module` to see how the module system manages the modules using `console.log(module)` from the main file that imports the module.
+The `module.export` allows to expose everything as an API: basic types, objects, functions and arrays.
+
+__Pro Tip.__ Explore the content of the global variable `module` to see how the module system manages the modules using `console.log(module)` from the main file that imports the module.
 {: .notice--info}
 
 ### AMD module format
@@ -358,17 +465,17 @@ All of the implementations are quite similar:
 - a module defines a local scope, an import and export sections:
   - local scope: everything defined into a module is _not global_
   - import: module elements are imported
-  - export: explicitly exports what a module should expose
+  - export: explicitly exports what a module _exposes_
 - modules are _singletons_, it does not matter how many time a module is imported, only one instance exists
 - a module system does not relies anymore on _global variables_.
 
-### Native ECMASscript 6 Modules (ESM)
+## Native ECMASscript 6 Modules (ESM)
 
 ES6 module or ESM take the best from the two worlds, CommonJs and AMD, and they are characterized by:
 
-- cyclic import in a transparent way
-- _static_ module structure so that static checking and code optimisation can be performed before the body is executed
-  - module must be at the top level, cannot be conditionally loaded as with CommonJS
+- cyclic import in a transparent way;
+- _static_ module structure so that static analysis and code optimisation can be performed before the body is executed;
+- module must be at _the top level only_, cannot be conditionally loaded as with CommonJS;
 - both _synchronous_ (server) and _asynchronous_ (browser) loading.
 
 We finally rewrite the example using ES6 modules:
@@ -388,6 +495,10 @@ export function interfaceFunction() {
 ```
 
 So the syntax is more readable and compact: what to `import` and what to `export` is cristal clear. The loader API is still in porgress.
+
+In ES6 `strict` mode is turned on [automatically](nicolas) so silent errors become thrown exceptions and bad parts of the language are not allowed.
+
+In ES6 modules are files that expose and API via the `export` keyword. Variable declarations are local to a module as in CommonJS, they cannot be access from outside unless explicitly exported.
 
 ## Resources
 
@@ -410,3 +521,6 @@ https://github.com/tc39/
 
 ---
 [todd-motto]: https://ultimatecourses.com/blog/mastering-the-module-pattern
+[nicolas]:https://ponyfoo.com/articles/es6-modules-in-depth
+[binding]:https://2ality.com/2015/07/es6-module-exports.html
+[patterns-book]:https://addyosmani.com/resources/essentialjsdesignpatterns/book/
