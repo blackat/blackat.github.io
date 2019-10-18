@@ -479,58 +479,81 @@ In a view defintion function `ɵvid` there are two interesting things:
 
 ## How Angular application bootstrap
 
-## Build and debug
+### 1. Platform
 
-Now build the application and start a live server to debug it into the browser:
-
-```bash
-ng build --aot
-npx http-server dist/test-ivy
-```
-
->The Angular AOT compiler extracts metadata to interpret the parts of the application that Angular is supposed to manage.
-
-Basically it manages metadata interpretation and template compilation that can be controlled specifying some template compiler options in the `tsconfig.json`.
-
-__Tip__ Activate the Ahead-of-Time compilation to have everything in JavaScript and saved to disk, we would like to inspect the generated code.
-{: .notice--info}
-
-### Bootstrap
-
-The bootstrap phase starts in the file `vendor-es2015.js`:
-
-```javascript
-class PlatformRef {
-    ...    
-    /**
-     * Creates an instance of an `\@NgModule` for the given platform
-     * for offline compilation.
-     */
-    bootstrapModuleFactory(moduleFactory, options) {
+`PlatfromRef` the [Angular platform](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/application_ref.ts#L235) is the entry point for Angular on a web page. Each page has exactly one platform, and services bound to its scope. A page's platform is initialized implicitly when a platform is created via a platform factory (e.g. platformBrowser).
+  
+  ```javascript
+  class PlatformRef {
+      ...
+      /**
+       * Creates an instance of an `\@NgModule` for the given platform
+       * for offline compilation.
+       */
+      bootstrapModuleFactory(moduleFactory, options) {
         // Note: We need to create the NgZone _before_ we instantiate the module,
         ...
-        return ngZone.run((..));
-    }
-```
-
-going up in the callstack:
-
-```javascript
-/**
- * A reference to an Angular application running on a page.
- */
-class ApplicationRef {
-  /**
-   * Bootstrap a new component at the root level of the application.
-   */
-  bootstrap(componentOrFactory, rootSelectorOrNode) {
-    ...
-    // create the app-root node
-    const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
-    ...
+        return ngZone.run((
+          ...
+          this._moduleDoBootstrap(moduleRef); // moduleType: *class AppModule*
+          return moduleRef;
+          ...
+        ));
+      }
+      ...
+      /**
+       * Bootstrap all the components of the module
+       */
+      _moduleDoBootstrap(moduleRef) {
+        ...
+        moduleRef._bootstrapComponents.forEach((
+          f => appRef.bootstrap(f))); // bootstrap the root component *AppComponent* with selector *app-root*
+        ));
+      }
   }
-}
-```
+  ```
+
+### 2. Application
+
+`ApplicationRef` the [reference](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/application_ref.ts#L503) to an Angular application running on a page.
+  
+  ```javascript
+  class ApplicationRef {
+      ...
+      /**
+       * Bootstrap a new component at the root level of the application.
+      * When bootstrapping a new root component into an application, Angular mounts the
+      * specified application component onto DOM elements identified by the componentType's
+      * selector and kicks off automatic change detection to finish initializing the component.
+      */
+      bootstrap(componentOrFactory, rootSelectorOrNode) {
+        ...
+        /**
+         * Use the componentFactory to create the root element app-root having this information:
+        * componentType: class AppComponent
+        * viewDefFactory: View_AppComponent_Host_0()
+        * selector: app-root
+        */
+        const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
+        ...
+      }
+  }
+  ```
+
+### 3. Root component
+
+Build the root component
+  
+  ```javascript
+  class ComponentFactory_ extends ComponentFactory {
+    ...
+    create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
+      const view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
+    }
+  }
+  ```
+
+#### More details
 
 In the Angular `component_factory.ts` [source file](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/linker/component_factory.ts#L79) we have the base class method to create a component of a certain type:
 
@@ -583,6 +606,130 @@ class ComponentFactory_ extends ComponentFactory<any> {
 }
 ```
 
+### 4. Create nodes
+
+```javascript
+function createRootView(root, def, context) {
+  const view = createView(root, root.renderer, null, null, def);
+  initView(view, context, context);
+  createViewNodes(view);
+  return view;
+}
+```
+
+```javascript
+function createViewNodes(view) {
+  const nodes = view.nodes;
+  for (let i = 0; i < def.nodes.length; i++) {
+    switch (nodeDef.flags & 201347067 /* Types */) {
+      case 1 /* TypeElement */:
+        // H1 DOM element of type any, the function call the DOM renderer to 
+        const el = (createElement(view, renderHost, nodeDef)));
+        ...
+        // View_AppComponent_0()
+        const compViewDef = resolveDefinition(((nodeDef.element)).componentView)));
+        ...
+        break;
+      case 2 /* TypeText */:
+        ...
+        break;
+      ...
+    }
+  }
+}
+```
+
+### 5. The renderer
+
+The [function](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/view/element.ts#L151) `createElement` will use the injected renderer to create the element.w.r.t. the plaftorm where the application runs.
+
+In case of `PlatformBrowser`, the `DefaultDomRenderer2` [class](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/platform-browser/src/dom/dom_renderer.ts#L115) invokes the `document` interface method to create the real DOM element.
+
+```javascript
+createElement(name: string, namespace?: string): any {
+    if (namespace) {
+      // In cases where Ivy (not ViewEngine) is giving us the actual namespace, the look up by key
+      // will result in undefined, so we just return the namespace here.
+      return document.createElementNS(NAMESPACE_URIS[namespace] || namespace, name);
+    }
+
+    return document.createElement(name);
+  }
+```
+
+---
+
+
+
+## Build and debug
+
+Now build the application and start a live server to debug it into the browser:
+
+```bash
+ng build --aot
+npx http-server dist/test-ivy
+```
+
+>The Angular AOT compiler extracts metadata to interpret the parts of the application that Angular is supposed to manage.
+
+Basically it manages metadata interpretation and template compilation that can be controlled specifying some template compiler options in the `tsconfig.json`.
+
+__Tip__ Activate the Ahead-of-Time compilation to have everything in JavaScript and saved to disk, we would like to inspect the generated code.
+{: .notice--info}
+
+### Bootstrap
+
+The bootstrap phase starts in the file `vendor-es2015.js`:
+
+```javascript
+class PlatformRef {
+    /**
+     * Creates an instance of an `\@NgModule` for the given platform
+     * for offline compilation.
+     */
+    bootstrapModuleFactory(moduleFactory, options) {
+        // Note: We need to create the NgZone _before_ we instantiate the module,
+        ...
+        return ngZone.run((
+          ...
+          this._moduleDoBootstrap(moduleRef); // moduleType: *class AppModule*
+          return moduleRef;
+          ...
+        ));
+    }
+    ...
+    /**
+     * Bootstrap all the components of the module
+     */
+    _moduleDoBootstrap(moduleRef) {
+      ...
+      moduleRef._bootstrapComponents.forEach((
+        f => appRef.bootstrap(f))); // bootstrap the root component *AppComponent* with selector *app-root*
+      ));
+    }
+  }
+}
+```
+
+going up in the callstack:
+
+```javascript
+/**
+ * A reference to an Angular application running on a page.
+ */
+class ApplicationRef {
+  /**
+   * Bootstrap a new component at the root level of the application.
+   */
+  bootstrap(componentOrFactory, rootSelectorOrNode) {
+    ...
+    // create the app-root node
+    const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
+    ...
+  }
+}
+```
+
 // screenshot
 
 ```javascript
@@ -631,45 +778,6 @@ createElement(name: string, namespace?: string): any {
     return document.createElement(name);
   }
 ```
-
-#### Types
-
-What are now the produced types?
-
-
-
-- ViewData
-
-```javascript
-export interface ViewData {
-  def: ViewDefinition;
-  root: RootData;
-  renderer: Renderer2;
-  // index of component provider / anchor.
-  parentNodeDef: NodeDef|null;
-  parent: ViewData|null;
-  viewContainerParent: ViewData|null;
-  component: any;
-  context: any;
-  // Attention: Never loop over this, as this will
-  // create a polymorphic usage site.
-  // Instead: Always loop over ViewDefinition.nodes,
-  // and call the right accessor (e.g. `elementData`) based on
-  // the NodeType.
-  nodes: {[key: number]: NodeData};
-  state: ViewState;
-  oldValues: any[];
-  disposables: DisposableFn[]|null;
-  initIndex: number;
-}
-```
-
-- ElementData
-- NodeDef
-- Services
-- ComponentFactory_
-- ComponentFactory
-- Renderer2
 
 ### The essential sequence
 
