@@ -44,6 +44,7 @@ kramdown:
   auto_ids: true
   footnote_nr: 1
   entity_output: as_char
+  # change it in the html template _layouts, this does not affect it
   toc_levels: 1..6
   smart_quotes: lsquo,rsquo,ldquo,rdquo
   enable_coderay: false
@@ -125,12 +126,6 @@ author:
   twitter: *twitter
 
 github: [metadata]
-
-# Outputting
-permalink: /:categories/:title/
-paginate: 5 # amount of posts to show
-paginate_path: /page:num/
-timezone: # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 # Archives
 #  Type

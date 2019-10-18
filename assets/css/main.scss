@@ -5,75 +5,188 @@
 @charset "utf-8";
 
 // Custom Blue Style.
-$global-font-family: 'Source Sans Pro', sans-serif !important;
-$link-color: #FF5370;
+$global-font-family: "Source Sans Pro", sans-serif !important;
+$link-color: #ff5370;
 /*************************************************
     syntax highlighting ($base16)
 *************************************************/
-$base00: #292D3E;
+$base00: #292d3e;
 $base01: #444267;
-$base02: #32374D;
-$base03: #676E95;
-$base04: #8796B0;
-$base05: #959DCB;
-$base06: #959DCB;
-$base07: #FFFFFF;
-$base08: #F07178;
-$base09: #F78C6C;
-$base0A: #FFCB6B;
-$base0B: #C3E88D;
-$base0C: #89DDFF;
-$base0D: #82AAFF;
-$base0E: #C792EA;
-$base0F: #FF5370;
+$base02: #32374d;
+$base03: #676e95;
+$base04: #8796b0;
+$base05: #959dcb;
+$base06: #959dcb;
+$base07: #ffffff;
+$base08: #f07178;
+$base09: #f78c6c;
+$base0A: #ffcb6b;
+$base0B: #c3e88d;
+$base0C: #89ddff;
+$base0D: #82aaff;
+$base0E: #c792ea;
+$base0F: #ff5370;
 
-@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
 
 body {
-    line-height: 26px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-weight: 400;
-    font-size: 20px;
+  line-height: 26px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  font-size: 16px;
+  color: #404040;
 }
 
 /*************************
     TOC sidebar 
 *************************/
 .svg-inline--fa {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
 .nav__title {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .toc .nav__title {
-    background: none;
-    color: #6f777d;
+  background: none;
+  color: #6f777d;
 }
 
 .toc {
-    border: none;
-    border-radius: 0px;
-    box-shadow: none;
-    -webkit-box-shadow: none;
+  border: none;
+  border-radius: 0px;
+  box-shadow: none;
+  -webkit-box-shadow: none;
 }
 
 .toc__menu a {
-    border: none;
+  border: none;
 }
 
 .toc .active a {
-    background-color: transparent;
-    border-left: 2px solid $link-color;
-    color: $link-color;
+  background-color: transparent;
+  border-left: 2px solid $link-color;
+  color: $link-color;
 }
 
 .italic-red-text {
-    color: #fd4445;
-    font-weight: 600;
-    font-style: normal;
+  color: #fd4445;
+  font-weight: 600;
+  font-style: normal;
+}
+
+/*************************
+    Inline code
+*************************/
+code.highlighter-rouge {
+  background-color: #f2f3f4;
+}
+
+/*************************
+    Blockquote
+*************************/
+blockquote {
+  border-left-color: #566573;
+}
+
+/*************************
+    Notices
+*************************/
+// carriage return after the title of the notice
+p strong:first-child {
+  display: block;
+  margin-bottom: 0.7em;
+}
+
+// colors from https://htmlcolorcodes.com/
+
+.notice--primary {
+  background-color: #e5e7e9;
+  font-size: 0.9em !important;
+
+  code {
+    background-color: #f2f3f4;
+  }
+
+  a {
+    color: #a6acaf;
+  }
+}
+
+.notice--internal {
+  @extend .notice;
+  background-color: #d2b4de;
+  font-size: 0.9em !important;
+
+  code {
+    background-color: #e8daef;
+  }
+
+  a {
+    color: #7d3c98;
+  }
+}
+
+.notice--info {
+  background-color: #aed6f1;
+  font-size: 0.9em !important;
+
+  code {
+    background-color: #d6eaf8;
+  }
+
+  a {
+    color: #2e86c1;
+  }
+
+  strong:first-child {
+    color: #2e86c1;
+  }
+}
+
+.notice--warning {
+  background-color: #f9e79f;
+  font-size: 0.9em !important;
+
+  code {
+    background-color: #fcf3cf;
+  }
+
+  a {
+    color: #d4ac0d;
+  }
+
+  strong:first-child {
+    color: #d4ac0d;
+  }
+}
+
+.notice--success {
+  background-color: #a2d9ce;
+  font-size: 0.9em !important;
+
+  code {
+    background-color: #d0ece7;
+  }
+
+  a {
+    color: #28b463;
+  }
+}
+
+.notice--danger {
+  background-color: #f1948a;
+  font-size: 0.9em !important;
+
+  code {
+    background-color: #f5b7b1;
+  }
+
+  a {
+    color: #cb4335;
+  }
 }

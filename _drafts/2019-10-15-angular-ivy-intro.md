@@ -25,6 +25,10 @@ The DOM update and view re-painting are costly operations. Angular, React and Vu
 
 Angular Ivy is the new Angular _renderer_ that uses _incremental DOM_.
 
+__Disclaimer__
+The post contains the thoughts of a preliminary investigation on how Angular works reading the some parts of the source code, debugging a simple application and reading how the compiler works. Some terms or definition could be wrong.
+{: .notice--danger}
+
 ## Lingo
 
 - _Object Model (OM):_ a way to model via object-oriented techniques (objects, classes, interfaces, properties, inheritance, encapsulation, etc) a system for development purpose: i.e. Apache POI implements a OM of Microsoft Excel that manipulates via a Java API.
@@ -44,7 +48,7 @@ Angular Ivy is the new Angular _renderer_ that uses _incremental DOM_.
 <cite>MDN</cite> - Mozilla Developer Network
 {: .small}
 
-__Pro Tip__
+__Tip__
 The HTML document is represented in object-oriented fashion, as objects in a logical tree, by the DOM that also provides the API to manipulate those objects.
 {: .notice--info}
 
@@ -61,7 +65,7 @@ Being the DOM represented as a tree, it makes easier to change and update the tr
 
 Moreover, a page is usually made of many components, complex and non-complex, every time one of them changes the all page needs to be re-rendered, a really expensive operation.
 
-__Pro Tip__
+__Tip__
 Frequent DOM manipulations make the user interface slow since the re-painting of the user interface is the most expensive part. It is something that has not been expected when it has been designed. For instance changing visibility of an element forces the browser to verify/check visibility of all other dom nodes.
 {: .notice--info}
 
@@ -80,7 +84,7 @@ The virtual DOM is a _tree_ as well made of _nodes_ that are the page elements. 
 
 Atransformations serie is calculated to update the browser DOM so that it matches the new virtual DOM. This transformations is both the minimal operations to be applied to the real DOM and the ones that reduce the perfomance cost of the DOM update.
 
-__Note__ The rendering process happens only on a _difference_, the _batch changes_ to be applied are optimized to improve the performance cost.
+__Internal__ The rendering process happens only on a _difference_, the _batch changes_ to be applied are optimized to improve the performance cost.
 {: .notice--info}
 
 ### What virtual DOM looks like
@@ -95,7 +99,7 @@ When a new item is added to an unordered list of elements a copy of the virtual 
 
 The _diffing_ process collects the differences between the two virtual DOM so changes can be transformed in a batch update against the real DOM.
 
-__Pro Tip__
+__Tip__
 Not distinction about _reflow_ (element layout: position recalculation and geometry) and _repaint_ (element visibility) has been done so far since most of the considered actions involve the repaint operation.
 {: .notice--info}
 
@@ -109,7 +113,7 @@ In React a user interface is made of a set of components, each component has a _
 
 Via the [observer pattern](https://www.baeldung.com/java-observer-pattern) React listens to _state change_ to update the virual DOM. The _diffing_ process makes React aware of which virtual DOM objects have changed, _only_ those objects will be updated in the real DOM.
 
-__Pro Tip__
+__Tip__
 As developer you don't need to be aware about how DOM manipulation happens at each state change. React does the job optimizing the performance cost behind the scenes.
 {: .notice--info}
 
@@ -120,7 +124,7 @@ The _great advantage_ of using the virtual DOM is that we don't need any compile
 ### Virtual DOM drawbacks
 
 - The virtual DOM required an _interpreter_ to interpret the component and, at compile time we don't know what we need, so the whole stuff has to be loaded by the browser.
-- e
+- Every time there is a change the a new virtual DOM has to be created, may be a chank and not the whole tree, but _the memory footprint is high_.
 
 The incremental DOM, as we will see, is based on instructions referenced by the component (factories). If, for some reason, an instruction is not referenced it won't be bundled with the application.
 
@@ -132,19 +136,22 @@ The key idea of the incremental DOM is:
 
 >Every component gets compiled into a series of instructions. These instructions create DOM trees and update them in-place when the data changes.
 
+<cite>Victor Savkin</cite> - [Understanding incremental DOM](https://blog.nrwl.io/understanding-angular-ivy-incremental-dom-and-virtual-dom-243be844bf36)
+{: .small}
+
 Let's see what the Angular compiler produces and how Angular incremental DOM technique differs from virtual DOM.
 
 ## Angular template compiler
 
-An Angular application is mainly made of by components organized in a tree fashion. Each component is implemented to accomplish a certain mission, for instance the navigation bar, the drop-down menu, etc.
+An Angular application is mainly made by _components_ organized in a tree fashion. Each component is implemented to accomplish a certain mission, for instance the navigation bar, the drop-down menu, etc.
 
-### Simple component defintion
+### Angular component
 
-A component is mainly HTML, the presentation, and some code, the logic, the hearth. Code is written in TypeScript and template in HTML. Consider a simple component, it is made of _"code and template"_.
+A component is mainly HTML, the presentation, and some code, the logic. Code is written in TypeScript and template in HTML.
 
 #### Code
 
-TypeScript code defines the component, both the logic and the structure or organization such as HTML, CSS, which selector, etc.
+TypeScript code defines both the logic and the metadata information.
 
 ```javascript
 import { Component } from '@angular/core';
@@ -161,43 +168,44 @@ export class AppComponent {
 
 #### HTML template
 
-Bunch of HTML code with binding variable to present, with a certain look and feel, some content.
+A template is a bunch of HTML code with binding variables to present, with a certain look and feel, some content.
 
 ```html
 <div style="text-align:center">
   <h1>
-    Welcome to {{ title }}!
+    {% raw %}Welcome to {{ title }}!{% endraw %}
   </h1>
 </div>
 ```
 
-In this simple example there is just a big title in the center of a blank page: _Welcome to a simple component_.
+### Browser cannot use an Angular component
 
-### Browser cannot use it
+The browser is the _execution enviroment_, it loads the application and executes it. Unfortuntely it cannot execute an Angular component _as it is_.
 
-The browser is the _execution enviroment_ for an Angular application, so it has to load the application and execute it, but unfortuntely it cannot load and execute an Angular component _as it is_.
-
-__ProTip.__ A browser can interpret JavaScript and render HTML but not in the Angular way.
+__Internal__ A browser can interpret JavaScript and render HTML but not in the Angular way.
 Angular provides a compiler that, along with the TypeScript one, transforms _"everything in something else"_ that a browser can understand.
-{: .notice--info}
+{: .notice--internal}
 
 During the build of an Angular project, two compilers come into play with _different purposes_:
 
-- `tsc` is the TypeScript compiler and generates the JavaScript w.r.t. the target specifief in the `tsconfig.json`, for instance `"target": "es2015",`.
-- `ngc` is the Angular template compiler that translate the component templates into _inline_ JavaScript. The Angular compiler can works in two different modes:
-  - Ahead-of-Time (AoT): work at build time so that the templates are bundled along with the application at build time. Suitable for production.
-  - Just-in-Time (JiT): templates are not pre-compiled, the compiler comes along with the application, is loaded by the browser and does the work at runtime. Suitable for development.
+- `tsc` is the TypeScript compiler and generates the JavaScript w.r.t. the target specified in the `tsconfig.json`, for instance `target: es2015`.
+- `ngc` is the Angular template compiler that translates the component template into _inline_ JavaScript. The Angular compiler can works in two different modes:
+  - _Ahead-of-Time (AoT):_ work at build time so that the templates are bundled along with the application, suitable for production.
+  - _Just-in-Time (JiT):_ templates are not pre-compiled, the compiler comes along with the application, it is loaded by the browser and does the work at runtime, suitable for development.
 
-__ProTip.__ During the development phase `ng serve` provides _live reload_ functionality, change your code and get the page automatically reloaded.
-The process goes through `@ngtools/webpack`, compiled code is not saved to disk, nothing it is, everything is consumed in memory via streams and emitters.
+__Tip__ During the development phase `ng serve` provides _live reload_ functionality.
+The process goes through `@ngtools/webpack`, compiled code is not saved to disk, everything is consumed in memory via streams and emitters.
 {: .notice--info}
 
-### Who does what
+### So who does what
 
 What are then the roles of the browser and Angular?
 
-Once the Angular application has been fully tranformed into JavaScript, HTML templates included, WebPack bundles it in order to boost even more the loading perfomance.
-The browser loads the `index.html`
+Once the Angular application has been _fully tranformed into JavaScript_ (HTML templates included), WebPack bundles it along with library dependencies in order to improve perfomance and load times.
+
+#### Browser
+
+The _browser role_ is loading the `index.html` and providing execution environment (render and event loop):
 
 ```html
 <!DOCTYPE html>
@@ -214,29 +222,33 @@ The browser loads the `index.html`
     <script src="vendor-es2015.js" type="module"></script>
     <script src="main-es2015.js" type="module"></script>
 
-    <script src="runtime-es5.js" nomodule defer></script>
-    <script src="polyfills-es5.js" nomodule defer></script>
-    <script src="styles-es5.js" nomodule defer></script>
-    <script src="vendor-es5.js" nomodule defer></script>
-    <script src="main-es5.js" nomodule defer></script>
+    <!-- removed the  nomodule defer -->
   </body>
 </html>
 ```
 
-Firs thing the scripts can be loaded both by modern browsers that supports ESM modules and by old ones that does not support modules via `nomodule defer`.
+The scripts can be loaded both by modern browsers that supports ESM modules and by old ones that does not support modules via `nomodule defer`.
 
-The `main-es2015.js` contains the full bundled applications while `vendor-es2015.js` is mainly Angular framework. The _browser role_ is to load and execute the JavaScript code. The starting point is Angular module transformed that try to render the `app-root` element executing the factories inside the file `main-es2015.js`.
+#### Angular
 
-__ProTip.__ The transformed HTML template into JavaScript becomes a kind of series of instructions for Angular to know how to rendere the page, how to build components. An element in the `js` file uses Angular function to create itself into the DOM and to update itself when something changes. Highly performant functions that, when called, update the DOM. This happens thanks to _bridges_ between the element, or node, and the real HTML element in the DOM.
+Consider an Angular application made of only the component previously introduced. The `main-es2015.js` contains the fully bundled application while `vendor-es2015.js` is mainly Angular framework and some third party library.
+
+The _Angular role_ is to bootstrap the `app` module that, in turn, creates and renderes the root element of the application: `<app-root>`. The file `main-es2015.js` contains the _view defintion factories_.
+
+__Tip__
+The transformed HTML template into JavaScript becomes a serie of instructions that, once called, _render_ the page building the components.
+Skipping some details, roughly an element is a factory function that uses the _injected Angular renderer_ to render the element w.r.t. the _platform_.
 {: .notice--info}
-  
->The Angular AOT compiler extracts metadata to interpret the parts of the application that Angular is supposed to manage.
 
-Basically it manages metadata interpretation and template compilation that can be controlled specifying some template compiler options in the `tsconfig.json`.
+__Internal__
+ If the browser platform is chosen, `@angular/platform-browser`, the element will be rendered creating the `HTML` code into the DOM via the `Document` interface: `document.createElement()`. When something changes, the element will update itself calling the update function.
+{: .notice--internal}
 
-## Compile with ngc
+## Analyze the compiled application
 
-We want to simply invoke the compiler to inspect what it produces without any Webpack interference, so open the `package.json` file and add the following option:
+We want to compile the application invoking _only_ the `ngc` compiler and nothing else to easily inspect the compiled code.
+
+Open the `package.json` file and add:
 
 ```javascript
 "scripts": {
@@ -245,7 +257,7 @@ We want to simply invoke the compiler to inspect what it produces without any We
 },
 ```
 
-then in the `tsconfig.json` enable the `d.ts` files generation, important to have the TypeScript definitions of the factories:
+then in the `tsconfig.json` enable the `d.ts` files generation to have the TypeScript definitions:
 
 ```javascript
 "compilerOptions": {
@@ -257,24 +269,26 @@ then in the `tsconfig.json` enable the `d.ts` files generation, important to hav
 
 Run `npm run compile` and look into the folder `dist/out-tsc/src/app` where everything has been transformed into JavaScript and saved to disk.
 
-### Minimal component
+### One and simple component
 
-Focus on the template, remember the performance optimization is related to the DOM update and user interface re-painting.
+As discussed at the beginning, the performance issue is related to the DOM update and user interface re-painting, so let's focus on the _template_.
 
 ```html
-<h1>Welcome to {{ title }}!</h1>
+<h1>{% raw %}Welcome to {{ title }}!{% endraw %}</h1>
 ```
 
-Consider the following files:
+The Angular template compiler has produced some files, skip the `.metadata` and `.d.ts` ones:
 
 ```bash
 app.module.js               // class where metadata (decorators) have been interpreted
-app.module.ngfactory.js     // 
-app.component.js
-app.component.ngfactory.js
+app.module.ngfactory.js     // module factory
+app.component.js            // class where metadata (decorators) have been interpreted
+app.component.ngfactory.js  // component factory
 ```
 
-In the `app.module.ngfactory.js` the important thing is the boostrap of the application specifying the _root component:_
+### Module factory function
+
+The `app.module.ngfactory.js` contains the _factory function creator_:
 
 ```javascript
 import * as i0 from "@angular/core";
@@ -286,13 +300,65 @@ var AppModuleNgFactory = i0.ɵcmf(i1.AppModule, [i2.AppComponent], function(_l) 
 ...
 ```
 
-Factories are produced by the Angular compiler and basically are functions that build a module, a component, etc.
+__Warning__
+The functions produced by the Angular template compiler start with `ɵ` to clearly warn __to not use them__ because for sure the code will change soon in the future.
+{: .notice--warning}
+
+The function `ɵcmf` stands for _create module factory_ and the map between the name and the real function is defined in the [following](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/platform-browser-dynamic/src/compiler_reflector.ts#L70) `Map<ExternalReference, any>`:
 
 ```javascript
-export declare function ɵcmf(ngModuleType: Type<any>, bootstrapComponents: Type<any>[], defFactory: NgModuleDefinitionFactory): NgModuleFactory<any>;
+function createBuiltinExternalReferencesMap() {
+  const map = new Map<ExternalReference, any>();
+  ...
+  map.set(Identifiers.createModuleFactory, ɵcmf);
+  ...
+  return map;
 ```
 
-Open `app.component.ngfactory.js`, start from the component factory function:
+#### Implementation
+
+The function implementation creates the [module factory object](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/entrypoint.ts#L35):
+
+```javascript
+export function createNgModuleFactory(
+    ngModuleType: Type<any>, bootstrapComponents: Type<any>[],
+    defFactory: NgModuleDefinitionFactory): NgModuleFactory<any> {
+      return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
+    }
+```
+
+and implements the [following interface](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/linker/ng_module_factory.ts#L60):
+
+```javascript
+export abstract class NgModuleFactory<T> {
+    abstract get moduleType(): Type<T>;
+    abstract create(parentInjector: Injector|null): NgModuleRef<T>;
+}
+```
+
+#### Module creation
+
+The module factory object can create a _module_ of type _AppModule_ defined in the class `app.module.js`, that will bootstrap a component of type `AppComponent` defined in the file `app.component.js`.
+
+The `defFactory` is a _function_ `ɵmod`, module definition, used by the `create` method to produce the real module object, it contains an array of `ɵmpd` module provider defintions that tell which sanitizer or producer has to be produced and injected, for instance:
+
+```javascript
+...
+var AppModuleNgFactory = i0.ɵcmf(i1.AppModule, [i2.AppComponent], function(_l) {
+  return i0.ɵmod([
+    ...
+    i0.ɵmpd(4608, i5.DomSanitizer, i5.ɵDomSanitizerImpl, [i4.DOCUMENT]),
+    i0.ɵmpd(6144, i0.Sanitizer, null, [i5.DomSanitizer]),
+    ...
+    i0.ɵmpd(6144, i0.RendererFactory2, null, [i5.ɵDomRendererFactory2]),
+    ...
+  ]
+}
+```
+
+### Component factory function
+
+Open `app.component.ngfactory.js` and look at `ɵccf` or _create component factory_ function:
 
 ```javascript
 import * as i1 from "@angular/core";
@@ -308,66 +374,112 @@ var AppComponentNgFactory = i1.ɵccf(
 );
 ```
 
-In a very simple way, the function takes type or class of the component and the factory function that produces the view definition related to the `app-root` selector.
-In turn the host node invoke the component factory to create the component defintion, `<h1>`, to be attached to the host.
-
-To better clarify some functions, open their definitions availbale inside the Angular `core.d.ts` definition file:
+defined as [follows](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/refs.ts#L33):
 
 ```javascript
-export declare function ɵccf(
-  selector: string,
-  componentType: Type<any>,
-  viewDefFactory: ViewDefinitionFactory,
-  inputs: {
-    [propName: string]: string;
-  } | null,
-  outputs: {
-    [propName: string]: string;
-  },
-  ngContentSelectors: string[]
-): ComponentFactory<any>;
-
-export declare function ɵeld(
-  checkIndex: number,
-  flags: ɵNodeFlags,
-  matchedQueriesDsl: null | [string | number, ɵQueryValueType][],
-  ngContentIndex: null | number,
-  childCount: number,
-  namespaceAndName: string | null,
-  fixedAttrs?: null | [string, string][],
-  bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][],
-  outputs?: null | ([string, string])[],
-  handleEvent?: null | ElementHandleEventFn,
-  componentView?: null | ViewDefinitionFactory,
-  componentRendererType?: RendererType2 | null
-): NodeDef;
-
-/**
- * A node definition in the view.
- */
-declare interface NodeDef {
-  flags: ɵNodeFlags;
-  nodeIndex: number;
-  checkIndex: number;
-  parent: NodeDef | null;
-  renderParent: NodeDef | null;
-  /** this is checked against NgContentDef.index to find matched nodes */
-  ngContentIndex: number | null;
-  /** number of transitive children */
-  childCount: number;
-  /** aggregated NodeFlags for all transitive children (does not include self) **/
-  childFlags: ɵNodeFlags;
-  /** aggregated NodeFlags for all direct children (does not include self) **/
-  directChildFlags: ɵNodeFlags;
-  bindingIndex: number;
-  bindings: BindingDef[];
-  bindingFlags: ɵBindingFlags;
-  outputIndex: number;
-  ...
+export function createComponentFactory(
+    selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory,
+    inputs: {[propName: string]: string} | null, outputs: {[propName: string]: string},
+    ngContentSelectors: string[]): ComponentFactory<any> {
+  
+  return new ComponentFactory_(
+      selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors
+    );
 }
 ```
 
-### Build and debug
+The factory is similar to the module one except for some more parameters. A component can have `@Input()` and `@Output` properties and hence the arrays `inputs` and `outputs`.
+
+__Info__
+It starts to be more and more clear how the component declaration is transformed into a set of arguments used by a factory to _programmatically_ create the component at runtime.
+{: .notice--primary}
+
+#### Compiled template
+
+What happened to template? This is why you have read so far... I hope :-)
+
+The component template has been transformed in a JavaScript object that adheres to the [following interface](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L53):
+
+```javascript
+export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
+  flags: ViewFlags;
+  updateDirectives: ViewUpdateFn;
+  updateRenderer: ViewUpdateFn;
+  handleEvent: ViewHandleEventFn;
+  nodes: NodeDef[];
+  nodeFlags: NodeFlags;
+  rootNodeFlags: NodeFlags;
+  lastRenderRootNode: NodeDef|null;
+  bindingCount: number;
+  outputCount: number;
+  nodeMatchedQueries: number;
+}
+```
+
+The view definition `ɵvid`, _view definition_, if the `app-root` _host selector_ is:
+
+```javascript
+export function View_AppComponent_Host_0(_l) {
+  return i1.ɵvid(
+    0,
+    [
+      (_l()(),
+        i1.ɵeld(
+          0,0,null,null,1,"app-root",[],null,null,null,
+          View_AppComponent_0,RenderType_AppComponent
+        )),
+      i1.ɵdid(1, 49152, null, 0, i2.AppComponent, [], null, null)
+    ],
+    null,
+    null
+  );
+}
+```
+
+Host selector since the component is attached/hosted by the selector, the Angular component is a directive, hence the view definition is characterized by:
+
+- `ɵeld`, _element definition_, the `app-root`, the function produces an [ElementDef](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L245);
+- `ɵdid`, _directive defintion_, the directive that represents the component, the function produces an [directiveDef](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/provider.ts#L30).
+
+Both objects of type [NodeDef](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L110).
+
+The element definition reference then `View_AppComponent_0`, the other JavaScript code that represents the component template:
+
+```javascript
+export function View_AppComponent_0(_l) {
+  return i1.ɵvid(0,
+    [
+      (_l()(),
+      i1.ɵeld(0, 0, null, null, 1, "h1", [], null, null, null, null, null)),
+      (_l()(), i1.ɵted(1, null, ["Welcome to ", "!"]))
+    ],
+    null,
+    function(_ck, _v) {
+      var _co = _v.component;
+      var currVal_0 = _co.title;
+      _ck(_v, 1, 0, currVal_0);
+    }
+  );
+}
+```
+
+The `ɵvid`, `viewDef` [function](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/view.ts#L23), takes two view update functions: `updateDirectives` and `updateRenderer` for the change detection.
+
+{% capture notice-text %}
+In a view defintion function `ɵvid` there are two interesting things:
+
+- `NodeDef[]` array of nodes that is responsible of the view creation;
+- `updateDirectives` and `updateRenderer` functions responsible of the change detection update.
+{% endcapture %}
+
+<div class="notice--internal">
+  <h4>Internal</h4>
+  {{ notice-text | markdownify }}
+</div>
+
+## How Angular application bootstrap
+
+## Build and debug
 
 Now build the application and start a live server to debug it into the browser:
 
@@ -376,10 +488,14 @@ ng build --aot
 npx http-server dist/test-ivy
 ```
 
-__ProTip.__ Activate the Ahead-of-Time compilation to have everything in JavaScript and saved to disk, we would like to inspect the generated code.
+>The Angular AOT compiler extracts metadata to interpret the parts of the application that Angular is supposed to manage.
+
+Basically it manages metadata interpretation and template compilation that can be controlled specifying some template compiler options in the `tsconfig.json`.
+
+__Tip__ Activate the Ahead-of-Time compilation to have everything in JavaScript and saved to disk, we would like to inspect the generated code.
 {: .notice--info}
 
-#### Bootstrap
+### Bootstrap
 
 The bootstrap phase starts in the file `vendor-es2015.js`:
 
@@ -731,7 +847,7 @@ Wehn building an application (a library is different) there are two steps:
 
 the compiler generate extra code such as ngfactory, ngsummary, ngstyle, etc. and then output the JavaScript code. When  the bundle process starts, Webpack will be configured to use the `ngfactory` file etc. but all the files are already in JavaScript.
 
-__Pro Tip.__ Angular does not output anymore `.ts` file since version 5.
+__Tip__ Angular does not output anymore `.ts` file since version 5.
 {: .notice-info}
 
 
