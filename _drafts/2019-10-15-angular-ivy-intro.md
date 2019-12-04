@@ -477,55 +477,103 @@ In a view defintion function `ɵvid` there are two interesting things:
   {{ notice-text | markdownify }}
 </div>
 
-## How Angular application bootstrap
+## Angular application bootstrap sequence
+
+How an Angular application bootstraps?
+
+Build the application with `--aot` option and start the `http-server`:
+
+```bash
+ng build --aot
+http-server dist/my-app
+```
+
+__Info__
+The application code is composed by `app.module.ts` and `app.component.ts`. First Angular has to be started, created the platform linked to the page, then start the application and finally the module. Once the module has been started the component can be instantiated and rendered.
+{: .notice--primary}
+
+### 0. IIEF
+
+The application starts in the file `main-es2015.js`. The option `--aot` contributes to some optimizations, `bootstrapModule` is replaced by `bootstrapModuleFactory` as you can observe from the file `main-aot.ts`:
+
+```javascript
+import { platformBrowser } from '@angular/platform-browser';
+
+import { AppModuleNgFactory } from './app.module.ngfactory';
+
+platformBrowser().bootstrapModuleFactory(AppModuleNgFactory);
+```
+
+__Tip__
+When invoking the `ng build` and not simply the compiler as done before, Webpack bundles what has been produce by the compiler, so opening the files results in a slightly different code.
+{: .notice--info}
+
+#### What happens
+
+The IIEF function bootstraps the platform (`PlatformRef`), that, in turn, instantiate the application (`ApplicationRef`) and then the module along with all the required injectable providers.
+
 
 ### 1. Platform
 
-`PlatfromRef` the [Angular platform](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/application_ref.ts#L235) is the entry point for Angular on a web page. Each page has exactly one platform, and services bound to its scope. A page's platform is initialized implicitly when a platform is created via a platform factory (e.g. platformBrowser).
-  
-  ```javascript
-  class PlatformRef {
+The Angular platform [`PlatfromRef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/application_ref.ts#L235) is the _entry point for Angular on a web page_. Each page has _exactly one platform_ and services bound to its scope. A _page's platform_ is initialized implicitly when a platform is created via a platform factory (e.g. platformBrowser).
+
+```javascript
+class PlatformRef {
+    ...
+    /**
+     * Creates an instance of an `\@NgModule` for the given platform
+     * for offline compilation.
+     */
+    bootstrapModuleFactory(moduleFactory, options) {
+      // Note: We need to create the NgZone _before_ we instantiate the module,
       ...
-      /**
-       * Creates an instance of an `\@NgModule` for the given platform
-       * for offline compilation.
-       */
-      bootstrapModuleFactory(moduleFactory, options) {
-        // Note: We need to create the NgZone _before_ we instantiate the module,
+      return ngZone.run((
+        const ngZoneInjector = Injector.create(
+          {providers: providers, parent: this.injector, name: moduleFactory.moduleType.name});
+
+        // from here the ApplicationRef is created and available to be injected
+        const moduleRef = InternalNgModuleRef<M>moduleFactory.create(ngZoneInjector);
         ...
-        return ngZone.run((
-          ...
-          this._moduleDoBootstrap(moduleRef); // moduleType: *class AppModule*
-          return moduleRef;
-          ...
-        ));
-      }
+        this._moduleDoBootstrap(moduleRef); // moduleType: *class AppModule*
+        return moduleRef;
+        ...
+      ));
+    }
+    ...
+    /**
+     * Bootstrap all the components of the module
+     */
+    _moduleDoBootstrap(moduleRef) {
       ...
-      /**
-       * Bootstrap all the components of the module
-       */
-      _moduleDoBootstrap(moduleRef) {
-        ...
-        moduleRef._bootstrapComponents.forEach((
-          f => appRef.bootstrap(f))); // bootstrap the root component *AppComponent* with selector *app-root*
-        ));
-      }
-  }
-  ```
+      const appRef = moduleRef.injector.get(ApplicationRef) as ApplicationRef;
+      ...
+      moduleRef._bootstrapComponents.forEach((
+        f => appRef.bootstrap(f))); // bootstrap the root component *AppComponent* with selector *app-root*
+      ));
+    }
+}
+```
+
+#### What happens
+
+Change detection is managed by `Zone.js` that run bootstrap of the module. `ApplicationRef` reference is created and then boostrap the `AppComponent` component.
+
+https://www.npmjs.com/package/zone.js?activeTab=readme
+https://blog.angularindepth.com/i-reverse-engineered-zones-zone-js-and-here-is-what-ive-found-1f48dc87659b
 
 ### 2. Application
 
-`ApplicationRef` the [reference](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/application_ref.ts#L503) to an Angular application running on a page.
+The [`ApplicationRef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/application_ref.ts#L503) reference represents an Angular application _running on a page_.
   
   ```javascript
   class ApplicationRef {
       ...
       /**
        * Bootstrap a new component at the root level of the application.
-      * When bootstrapping a new root component into an application, Angular mounts the
-      * specified application component onto DOM elements identified by the componentType's
-      * selector and kicks off automatic change detection to finish initializing the component.
-      */
+       * When bootstrapping a new root component into an application, Angular mounts the
+       * specified application component onto DOM elements identified by the componentType's
+       * selector and kicks off automatic change detection to finish initializing the component.
+       */
       bootstrap(componentOrFactory, rootSelectorOrNode) {
         ...
         /**
@@ -555,7 +603,7 @@ Build the root component
 
 #### More details
 
-In the Angular `component_factory.ts` [source file](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/linker/component_factory.ts#L79) we have the base class method to create a component of a certain type:
+The Angular [`component_factory.ts`](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/linker/component_factory.ts#L79) holds the base class method to create a component of a certain type:
 
 ```javascript
 /**
@@ -575,8 +623,6 @@ export abstract class ComponentFactory<C> {
       ngModule?: NgModuleRef<any>): ComponentRef<C>;
 }
 ```
-
-and its implementation:
 
 ```javascript
 class ComponentFactory_ extends ComponentFactory<any> {
@@ -605,6 +651,11 @@ class ComponentFactory_ extends ComponentFactory<any> {
   }
 }
 ```
+
+#### What happens
+
+The implementation uses the function `resolveDefinition()` to load the view definition. This function will be used many times around the code. The `createRootView()` function creates a `ViewData` object that contains the information that will be used later on to render the node into the DOM. The component reference 
+
 
 ### 4. Create nodes
 
@@ -959,167 +1010,12 @@ __Tip__ Angular does not output anymore `.ts` file since version 5.
 {: .notice-info}
 
 
-Into `core.d.ts` you can find definition of some functions used in the template JavaScript trasformation, all of them are prefixed by the symbol `ɵ` like `ɵvid`. It is a way to say "ehi don't use it, for sure it will change in the future and you will be definitely screwed", it is a symbol to scare you, like the vivid colors of some venomous creatures "ehi pay attention, I am venomous!".
+Into `core.d.ts` you can find definition of some functions used in the template JavaScript transformation, all of them are prefixed by the symbol `ɵ` like `ɵvid`. It is a way to say "ehi don't use it, for sure it will change in the future and you will be definitely screwed", it is a symbol to scare you, like the vivid colors of some venomous creatures "ehi pay attention, I am venomous!".
 
 Now let's have a look at some files
 
 ```javascript
 export declare function ɵvid(flags: ɵViewFlags, nodes: NodeDef[], updateDirectives?: null | ViewUpdateFn, updateRenderer?: null | ViewUpdateFn): ɵViewDefinition;
-```
-
-The `input` elements is translated in JavaScript like this:
-
-```javascript
- i1.ɵeld(
-        5,
-        0,
-        null,
-        null,
-        5,
-        "input",
-        [],
-        [
-          [2, "ng-untouched", null],
-          [2, "ng-touched", null],
-          [2, "ng-pristine", null],
-          [2, "ng-dirty", null],
-          [2, "ng-valid", null],
-          [2, "ng-invalid", null],
-          [2, "ng-pending", null]
-        ],
-        [
-          [null, "ngModelChange"],
-          [null, "input"],
-          [null, "blur"],
-          [null, "compositionstart"],
-          [null, "compositionend"]
-        ],
-        function(_v, en, $event) {
-          console.log(en);
-          var ad = true;
-          var _co = _v.component;
-          if ("input" === en) {
-            var pd_0 =
-              i1.ɵnov(_v, 6)._handleInput($event.target.value) !== false;
-            ad = pd_0 && ad;
-          }
-          if ("blur" === en) {
-            var pd_1 = i1.ɵnov(_v, 6).onTouched() !== false;
-            ad = pd_1 && ad;
-          }
-          if ("compositionstart" === en) {
-            var pd_2 = i1.ɵnov(_v, 6)._compositionStart() !== false;
-            ad = pd_2 && ad;
-          }
-          if ("compositionend" === en) {
-            var pd_3 =
-              i1.ɵnov(_v, 6)._compositionEnd($event.target.value) !== false;
-            ad = pd_3 && ad;
-          }
-          if ("ngModelChange" === en) {
-            var pd_4 = (_co.title = $event) !== false;
-            ad = pd_4 && ad;
-          }
-          return ad;
-        },
-        null,
-        null
-      )),
-```
-
-The function instead is 
-
-```javascript
-export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
-```
-
-The function is then `handleEvent?: null | ElementHandleEventFn`, it has three parameters and the `if` block manages different kind of possible events. If we type something in the input field the `ngModelChange === en` will be true.
-
-Then the two `ViewUpdateFn` are defined in this way:
-
-```javascript
-function(_ck, _v) {
-      var _co = _v.component;
-      var currVal_8 = _co.title;
-      _ck(_v, 8, 0, currVal_8);
-    },
-function(_ck, _v) {
-      var _co = _v.component;
-      var currVal_0 = _co.title;
-      _ck(_v, 2, 0, currVal_0);
-      var currVal_1 = i1.ɵnov(_v, 10).ngClassUntouched;
-      var currVal_2 = i1.ɵnov(_v, 10).ngClassTouched;
-      var currVal_3 = i1.ɵnov(_v, 10).ngClassPristine;
-      var currVal_4 = i1.ɵnov(_v, 10).ngClassDirty;
-      var currVal_5 = i1.ɵnov(_v, 10).ngClassValid;
-      var currVal_6 = i1.ɵnov(_v, 10).ngClassInvalid;
-      var currVal_7 = i1.ɵnov(_v, 10).ngClassPending;
-      _ck(
-        _v,
-        5,
-        0,
-        currVal_1,
-        currVal_2,
-        currVal_3,
-        currVal_4,
-        currVal_5,
-        currVal_6,
-        currVal_7
-      );
-    }
-```
-
-Then analyzing the other nodes from the array
-
-```javascript
-i1.ɵdid(
-        6,
-        16384,
-        null,
-        0,
-        i2.DefaultValueAccessor,
-        [i1.Renderer2, i1.ElementRef, [2, i2.COMPOSITION_BUFFER_MODE]],
-        null,
-        null
-      ),
-      i1.ɵprd(
-        1024,
-        null,
-        i2.NG_VALUE_ACCESSOR,
-        function(p0_0) {
-          return [p0_0];
-        },
-        [i2.DefaultValueAccessor]
-      ),
-      i1.ɵdid(
-        8,
-        671744,
-        null,
-        0,
-        i2.NgModel,
-        [[8, null], [8, null], [8, null], [6, i2.NG_VALUE_ACCESSOR]],
-        { model: [0, "model"] },
-        { update: "ngModelChange" }
-      ),
-      i1.ɵprd(2048, null, i2.NgControl, null, [i2.NgModel]),
-      i1.ɵdid(
-        10,
-        16384,
-        null,
-        0,
-        i2.NgControlStatus,
-        [[4, i2.NgControl]],
-        null,
-        null
-      )
-```
-
-```javascript
-/**
-The default `ControlValueAccessor` for writing a value and listening to changes on input
- * elements. The accessor is used by the `FormControlDirective`, `FormControlName`, and
- * `NgModel` directives.
-*/
 ```
 
 #### Zone.js - how to handle change detection
@@ -1131,3 +1027,20 @@ Angular picks up changes and then calls tick so that any listeners for those cha
 
 https://www.npmjs.com/package/zone.js?activeTab=readme
 https://blog.angularindepth.com/i-reverse-engineered-zones-zone-js-and-here-is-what-ive-found-1f48dc87659b
+
+## References
+
+#### Angular compiler
+
+[deep-dive-compiler](https://blog.angularindepth.com/a-deep-deep-deep-deep-deep-dive-into-the-angular-compiler-5379171ffb7a)
+[deep-dive-compiler-video](https://www.youtube.com/watch?v=QQ2plVD0gDI&feature=youtu.be&t=27m)
+[angular-compiler-4-video](https://www.youtube.com/watch?v=RXYjPYkFwy4)
+[angular-compiler-mad-science](https://www.youtube.com/watch?v=tBV4IQwPssU)
+
+#### Incremental DOM and Ivy
+
+[angular-ivy-first-exploration](https://blog.angularindepth.com/inside-ivy-exploring-the-new-angular-compiler-ebf85141cee1)
+[angular-incremental-dom-ivy](https://blog.nrwl.io/understanding-angular-ivy-incremental-dom-and-virtual-dom-243be844bf36)
+[angular-incremental-dom](http://google.github.io/incremental-dom/)
+[angular-incremental-dom-why](http://google.github.io/incremental-dom/#why-incremental-dom)
+[incremental-dom](https://medium.com/google-developers/introducing-incremental-dom-e98f79ce2c5f)

@@ -31,6 +31,9 @@ $base0F: #ff5370;
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
 
+/*************************
+    Global
+*************************/
 body {
   line-height: 26px;
   -webkit-font-smoothing: antialiased;
@@ -38,6 +41,10 @@ body {
   font-weight: 400;
   font-size: 16px;
   color: #404040;
+}
+
+a {
+  text-decoration: none !important;
 }
 
 /*************************
