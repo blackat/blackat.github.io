@@ -14,61 +14,82 @@ toc_icon: "list"
 toc_sticky: true
 ---
 
-Angular Ivy is the new *rendering architecture* that comes, by default, with version 9. The Angular rendering architecture is not new to a completely new revamp, Angular 2.0, Angular 4.0 and now Angular 9.0 have introduced new compilers and rendering engines.
+Angular Ivy is the new *rendering architecture* that comes, by default, with version Angular 9. The Angular rendering architecture is not new to a completely revamp, Angular 2.0, Angular 4.0 and now Angular 9.0 have introduced new *compilers* and *runtime engines*.
 
 Currently Angular stable version is 8.3.9 and Angular 9 is in RC4.
 
 ## Rendering Architecture
 
-What is a rendering architecture? It is the pair compiler:runtime that allows a developer to write templates via Angular declarative syntax and run the optimized bundled application in a web browser.
+What is a rendering architecture? It is the pair *compiler:runtime*. Angular framework is composed by two main parts:
+
+- *compiler* to transform templates written in Angular declarative syntax into JavaScript instructions enriched with change detection;
+- *runtime* to execute the application code produced by the compiler.
+
+Currently, Angular 8 uses as rendering architecture called *View Engine*:
 
 - **View Engine** has been introduced with Angular version 4 and still used in version 8, but some limitations has been identified
-  - *no tree-shakable:* both the `Hello World` application and a very complex one are supported by the full runtime. If the internationalization module is not used it is included in the runtime as well, currently it cannot be tree-shaked.
-  - *no incremental compilation:* Angular compilation is global, it involves not only the application but the libraries as well.
-- **Ivy** will be activated by default in version 9 and should solve the View Engine current issues and it enables new possibilities, "Ivy is an enables (Igor Minar)":
+  - *no tree-shakable:* both the `Hello World` application and a very complex one are executed by the same and full runtime. If the internationalization module is not used, for instance, it is part of the runtime anyhow, basically the runtime it cannot be tree-shakable;
+  - *no incremental compilation:* *Angular compilation is global*{: .italic-red-text} and it involves not only the application but also the libraries.
+- **Ivy** will the new default rendering engine starting from version 9 and should solve the View Engine current issues:
   - *simplify* how Angular works internally;
-  - *three-shakable:* the `Hello World` application does not required the full Angular runtime and wil be bundled in only 4.7 KB;
+  - *three-shakable*  the `Hello World` application does not required the full Angular runtime and wil be bundled in only 4.7 KB;
   - *incremental compilation* is not possible so the compilation is faster than ever and `--aot` can be now used even during development mode (advice from Angular team).
+
+> "Ivy is an enabler."
+
+<cite>Igor Minar</cite> - Angular team
+{: .small}
+
+The incremental DOM is the [foundation of the new rendering engine][nrwl-ivy]
 
 ## Incremental DOM vs. Virtual DOM
 
 > Every component gets compiled into a series of instructions. These instructions create DOM trees and update them in-place when the data changes.
 
-Each compiled component has two main sections: one for *view creation* and one for *change detection*. The first one will be called when the component will be rendered the first time, the second one when changes involving the component will happen. Change detection is basically a function that is added at compile time, it is something the developer is not aware of when implement the component, the Angular template declarative syntax makes use only of *binding*.
+<cite>Viktor Savkin</cite> - [Nrwl][nrwl-ivy]
+{: .small}
 
-Incremental DOM enables better bundle size and memory footprint so that applications can really well perform on mobile devices.
+Each compiled component has *two main set of instructions*:
+
+- *view creation* instructions executed when the component is rendered for the first time;
+- *change detection* instructions to update the DOM when the component changes.
+
+Change detection is basically a set of instructions added at compile time. The developer life is made easier since he is aware only of the variable *binding* in the Angular template declarative.
+
+Incremental DOM enables *better bundle size and memory footprint*{: .italic-red-text} so that applications can perform really well on mobile devices.
 
 ### Virtual DOM
 
-React as Vue make use the concept of Virtual DOM to create a component and re-render it when change detection happens.
+React and Vue are based on the concept of *Virtual DOM* to create a component and re-render it when change detection happens.
 
-Render the DOM is a very expensive operation, when a component is added to the DOM or changes, the repaint operation has to take place. Virtual DOM strategies aims to reduce the amount of work on the real DOM and so the number of time the user interface needs to be repainted.
+Render the DOM is a very expensive operation, when a component is added to the DOM or changes happen, the repaint operation has to take place. Virtual DOM strategy aims to reduce the amount of work on the real DOM and so the number of time the user interface needs to be repainted.
 
-DOM manipulations happens every time a new component is going to be added, removed or changed from the DOM, so instead of operating directly on the DOM it operates on a JSON object called Virtual DOM. When a new component is added or an existing one removed, a new Virtual DOM is added, the difference between virtual DOMs is computed and a serie of transformation is applied to the real DOM.
+DOM manipulations happens every time a new component is going to be added, removed or changed from the DOM, so instead of operating directly on the DOM it operates on a JSON object called Virtual DOM. When a new component is added or an existing one removed, a new Virtual DOM is created, the node added or removed and the difference between Virtual DOMs is computed. A sequence of transformations is applied to the real DOM.
 
-![image-center](/assets/images/posts/angular-ivy-intro/virtual-dom.png ){: .align-center}
+![image-center](/assets/images/posts/angular-ivy-intro/virtual-dom-transparent.png ){: .align-center}
 
-React advices to use JSX, a *syntax extension* to JavaScript, to define *React elements*, it is not a template languages. A template is an enriched JavaScript expression that is interpreted at runtime. Plain JavaScript can also be used instead of JSX.
+React advices to use JSX, a *syntax extension* to JavaScript, to define *React elements*. JSX is not a template language. A template is an enriched JavaScript expression that is interpreted at runtime. Plain JavaScript can also be used instead of JSX.
 
 Virtual DOM technique has some disadvantages:
 
 - create a whole tree every time a change happens (add or remove a node), so the memory footprint is quite important;
-- an interpreter is required as long as the *diff* algorithm to compute the difference among the Virtual DOMs. At compile time it is not known which functionalities are required to render the application, so the whole thing has to be shipped to the browser.
+- an interpreter is required as long as the *diff* algorithm to compute the difference among the Virtual DOMs. At compile time it is not known which functionalities are required to render the application, so *the whole thing has to be shipped to the browser*.
 
 ### Incremental DOM
 
-It is the foundation of the new rendering engine. Each *component template* gets compiled into creation and change detection instructions: one to add the component to the DOM and the other one to updated the DOM *in-place* when data changes.
+It is the foundation of the new rendering engine. Each *component template* gets compiled into creation and change detection instructions: one to add the component to the DOM and the other one to update the DOM *in-place*{: .italic-red-text}.
 
-**Internals**
-Instructions are not interpreted by the Angular runtime, the rendering engine, but *the instructions are the rendering engine*.
-{: .notice--internal}
+> Instructions are *not interpreted* by the Angular runtime, the rendering engine, but *the instructions are the rendering engine*{: .italic-red-text}.
 
-Since the runtime does not interpret the template component instructions, but the *component references instructions* it is quite easy to remove those instructions that are not referenced. At compile time the unused instruction can be excluded from the bundle.
+<cite>Viktor Savkin</cite> - [Nrwl][nrwl-ivy]
+{: .small}
 
-Moreover the amount of memory required to render the DOM is proportional to the size of the component.
+Since the runtime does not interpret the template component instructions, but the *component references instructions*{: .italic-red-text} it is quite easy to remove those instructions that are not referenced. At compile time the unused instruction can be excluded from the bundle.
+
+The amount of memory required to render the DOM is *proportional* to the size of the component.
 
 **Tip**
-The compiled template component references some instructions of the Angular runtime which holds their implementation.
+The compiled template component references some instructions of the Angular runtime which holds the implementation.
 {: .notice--info}
 
 ## Angular Ivy Compilation Example
@@ -94,7 +115,7 @@ export class AppComponent {
 }
 ```
 
-it gets compiled into the following code
+it gets compiled into the following code:
 
 ```javascript
 class AppComponent {
@@ -119,27 +140,37 @@ AppComponent.ngComponentDef = defineComponent({
   });
 ```
 
-The Angular decorators are compiled into *static fields* in the decorated class. So `@Component` becomes `ngComponentDef` static field. Back to View Engine, the `ngc` compiler produces `.ngfactory` separated files for each component and modules. With Ivy the code produced by the compiler is move into *component class static fields*.
+The Angular decorators are compiled into *static fields*{: .italic-red-text} in the decorated class. So `@Component` becomes `ngComponentDef` static field. Back to View Engine, the `ngc` compiler produces `.ngfactory` separated files for each component and modules. With Ivy the code produced by the compiler is move into *component class static fields*.
 
 The `elementStart()`, `elementEnd()`, etc are the component referenced instructions, *every component is its own factory*, the framework does not interpret the component.
 
-**Internals**
-The View Engine runtime is a *single monolith interpreter* that is not tree-shakable and has to be entirely shipped to the browser. Unlike, Angular Ivy runtime is an *instruction set* that is a *set of rendering functions* like an assembly language for templates.
-{: .notice--internal}
+All the not referenced instructions at compile time are then removed from the final application bundle.
+
+![image-center](/assets/images/posts/angular-ivy-intro/incremental-dom.png ){: .align-center}
+
+**Tip**
+The View Engine runtime is a *single monolith interpreter* that is not tree-shakable and has to be entirely shipped to the browser. Unlike, Angular Ivy runtime is an *instruction set*{: .italic-red-text} that is a *set of rendering functions* like an assembly language for templates.
+{: .notice--info}
 
 ## What Angular Ivy enables
 
-Angular Ivy is an enabler. Simplifying how Angular works internally and the compilation process enable really interesting features and makes Angular easily opened to future improvement.
+Angular Ivy is an enabler. Simplifying how Angular works internally and the compilation process resolves current View Engine limitations and makes Angular easily extensible to new features.
+
+The new Ivy engineering has been driven by three main principles: three-shaking, locality and flexibility.
 
 ### Tree-shaking
 
-Tree-shaking is the operation or removing *dead code* from the bundle so if the application does not use all the functions from a library, they can be omit from the bundle making it smaller.
+Tree-shaking is the operation of removing *dead code*{: .italic-red-text} from the bundle so if the application does not use all the functions from a library, they can be omit from the bundle making it smaller.
 
-Dead code comes from libraries Angular included. Angular CLI is powered by Webpack uglify plugin as tree-shaker that, in turn, receives information from Angular Build Optimizer Plugin about which code is used and which not. This plugin, after compilation, can gather information about component referenced instructions hence can instruct Uglify about what to include in the bundle.
+Dead code comes from libraries, Angular included. Angular CLI is powered by Webpack uglify plugin as tree-shaker that, in turn, receives information from *Angular Build Optimizer Plugin* about which code is used and which not. This plugin, after compilation, can gather information about component referenced instructions so can instruct Uglify about what to include/exclude in/from the bundle.
 
 Angular compiler simply does not emit those instructions so they are not included into the bundle.
 
-While the `@angular/core` framework is tree-shakable, the View Engine runtime is not, it cannot be broken into small pieces and this is mainly due to the static `Map<Component, ComponentFactory>`.
+**Tip**
+Webpack creates a bundle for the application and a bundle for vendor. Referenced instruction implementations are bundled in the vendor bundle, the non-referenced ones, since not emitted will not be included in it.
+{: .notice--info}
+
+While the `@angular/core` framework is tree-shakable, the View Engine runtime is not, it cannot be broken into small pieces and this is mainly due to the static `Map<Component, ComponentFactory>` variable.
 
 ### Incremental compilation
 
@@ -164,6 +195,156 @@ Angular Ivy instead relies on the *public API*, so library code can be compiled 
 ### Flexibility
 
 // todo
+
+tsickle@0.37.1 requires a peer of typescript@~3.6.4 but none is installed. You must install peer dependencies yourself.
+
+## How Ivy libraries build changed
+
+### Setup of the workspaces
+
+Two workspaces have been created, one based on Angular version `8.2.9` and the other one on `9.0.0-rc.5`. Then the same library have been added to both of them:
+
+```bash
+$ ng generate library mylib
+```
+
+and then built it. First thing to notice is the new message displayed in version 9 due to Ivy activated by default:
+
+```bash
+Building Angular Package
+******************************************************************************
+It is not recommended to publish Ivy libraries to NPM repositories.
+Read more here: https://next.angular.io/guide/ivy#maintaining-library-compatibility
+******************************************************************************
+```
+
+This is the placeholder component generated by the Angular CLI:
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'lib-mylib',
+  template: `
+    <p>mylib works!</p>
+  `,
+  styles: []
+})
+export class MylibComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() { }
+}
+```
+
+#### Angular 8 library build
+
+```bash
+├── bundles
+├── ...
+├── lib
+│   ├── mylib.component.d.ts
+│   ├── mylib.module.d.ts
+│   └── mylib.service.d.ts
+├── mylib.d.ts
+├── mylib.metadata.json
+├── package.json
+└── public-api.d.ts
+```
+
+#### Angular 9 library build
+
+```bash
+├── bundles
+├── ...
+├── lib
+│   ├── mylib.component.d.ts
+│   ├── mylib.module.d.ts
+│   └── mylib.service.d.ts
+├── mylib.d.ts
+├── package.json
+└── public-api.d.ts
+```
+
+### Metadata inside the definition files
+
+The metadata `mylib.metadata.json` is not generated anymore, metadata are now part of the definition file of the component:
+
+```javascript
+import { OnInit } from "@angular/core";
+import * as i0 from "@angular/core";
+export declare class MylibComponent implements OnInit {
+  constructor();
+  ngOnInit(): void;
+  static ɵfac: i0.ɵɵFactoryDef<MylibComponent>;
+  static ɵcmp: i0.ɵɵComponentDefWithMeta<MylibComponent,"lib-mylib",never,{},{},never>;
+}
+```
+
+The same happens for modules and services
+
+```javascript
+import * as i0 from "@angular/core";
+import * as i1 from "./mylib.component";
+export declare class MylibModule {
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MylibModule, [typeof i1.MylibComponent], never, [typeof i1.MylibComponent]>;
+    static ɵinj: i0.ɵɵInjectorDef<MylibModule>;
+}
+```
+
+```javascript
+import * as i0 from "@angular/core";
+export declare class MylibService {
+    constructor();
+    static ɵfac: i0.ɵɵFactoryDef<MylibService>;
+    static ɵprov: i0.ɵɵInjectableDef<MylibService>;
+}
+```
+
+### Modify the component
+
+Add to the library component an input field:
+
+```javascript
+@Component({
+  selector: 'lib-mylib',
+  template: `
+    <p>Please input your phone</p>
+    <input #phone placeholder="phone number" />
+  `,
+  styles: []
+})
+export class MylibComponent implements OnInit {
+
+  @Input('phone-number') private phone: string;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+}
+```
+
+The alias `phone-number` has been added to the *input property*{: .italic-red-text}, the compiler generates the following definition file:
+
+```javascript
+import { OnInit } from '@angular/core';
+import * as i0 from "@angular/core";
+export declare class MylibComponent implements OnInit {
+    private phone;
+    constructor();
+    ngOnInit(): void;
+    static ɵfac: i0.ɵɵFactoryDef<MylibComponent>;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MylibComponent, "lib-mylib", never, { 'phone': "phone-number" }, {}, never>;
+}
+```
+
+Comparing the two `mylib.component.d.ts` is interesting to notice how the component definition metadata has changed to include the *input property*
+
+- bundles
+  - runtime
+  - library
 
 ## Angular Ivy Build Pipeline
 
@@ -237,11 +418,11 @@ Why, again, a compiler is required? not possible to do by hand?
 
 #### JIT (development mode)
 
-Imperative code is generated at rutime. TypeScript is transpiled (`tsc`) into JavaScript, decorators (`@Component`) invoke the compiler.
+Imperative code is generated at runtime. TypeScript is transpiled (`tsc`) into JavaScript, decorators (`@Component`) invoke the compiler.
 
 #### AoT
 
-Imperative code is generated at build time. `ngc` compiles TypeScript code into JavaScript and pre-compile the decorators into imperative code to be rendered in the browser avoiding the cost of rutime compilation.
+Imperative code is generated at build time. `ngc` compiles TypeScript code into JavaScript and pre-compile the decorators into imperative code to be rendered in the browser avoiding the cost of runtime compilation.
 
 ### Angular architecture
 
@@ -267,5 +448,6 @@ Once all the information of classes has been collected, it looks again at the wh
 
 ## References
 
-ac-2019-keynote:https://www.youtube.com/watch?v=6Zfk0OcFGn4&list=PLAw7NFdKKYpE-f-yMhP2WVmvTH2kBs00s
-ac-2019-alex-rickabaugh:https://www.youtube.com/watch?v=anphffaCZrQ&list=PLAw7NFdKKYpE-f-yMhP2WVmvTH2kBs00s&index=2
+[ac-2019-keynote]: https://www.youtube.com/watch?v=6Zfk0OcFGn4&list=PLAw7NFdKKYpE-f-yMhP2WVmvTH2kBs00s
+[ac-2019-alex-rickabaugh]: https://www.youtube.com/watch?v=anphffaCZrQ&list=PLAw7NFdKKYpE-f-yMhP2WVmvTH2kBs00s&index=2
+[nrwl-ivy]: https://blog.nrwl.io/understanding-angular-ivy-incremental-dom-and-virtual-dom-243be844bf36

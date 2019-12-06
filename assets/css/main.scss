@@ -7,10 +7,11 @@
 // Custom Blue Style.
 $global-font-family: "Source Sans Pro", sans-serif !important;
 $link-color: #ff5370;
+$highlighted-color: #fd4445;
 /*************************************************
     syntax highlighting ($base16)
 *************************************************/
-$base00: #292d3e;
+$base00: #232031;
 $base01: #444267;
 $base02: #32374d;
 $base03: #676e95;
@@ -80,8 +81,9 @@ a {
   color: $link-color;
 }
 
+// Can be used to highlight a word as well, e.g. *word*{: .italic-red-text }
 .italic-red-text {
-  color: #fd4445;
+  color: $highlighted-color;
   font-weight: 600;
   font-style: normal;
 }
@@ -91,6 +93,34 @@ a {
 *************************/
 code.highlighter-rouge {
   background-color: #f2f3f4;
+}
+
+/*************************
+    Block code
+*************************/
+div.highlighter-rouge {
+  padding-top: 30px;
+}
+
+div.highlighter-rouge::before {
+  content: "\2022 \2022 \2022";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: #3c3d58;
+  color: #c2c3c4;
+  width: 100%;
+  line-height: 0;
+  padding: 14px 0 10px 0;
+  font-size: 0.65rem;
+  text-indent: 7px;
+  letter-spacing: 4px;
+  border-radius: 4px;
+}
+
+tt,code,kbd,samp,pre {
+  font-family: SFMono-Regular,Menlo,monospace;
 }
 
 /*************************
@@ -139,8 +169,11 @@ p strong:first-child {
 }
 
 .notice--info {
-  background-color: #aed6f1;
+  border-left: 8px solid #5DADE2;
+  background-color: #EBF5FB;
   font-size: 0.9em !important;
+  box-shadow: none;
+  border-radius: 0px;
 
   code {
     background-color: #d6eaf8;
