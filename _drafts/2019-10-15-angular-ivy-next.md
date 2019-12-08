@@ -18,6 +18,20 @@ Angular Ivy is the new *rendering architecture* that comes, by default, with ver
 
 Currently Angular stable version is 8.3.9 and Angular 9 is in RC4.
 
+## Lingo
+
+- rendering architecture
+- runtime rendering function set/instruction set
+- runtime/compiler
+- virtual DOM
+- incremental DOM
+- View Engine
+- `angular.json` is the workspace or build configuration file.
+- `tsconfig.app.json` is the project configuration file.
+- `.ngfactory.js` suffix for decorator factory files, class decorators like `@Component` are translated by the compiler into external files.
+- Locality: compiler should use only information from the component decorator and its class.
+- Global compilation: compilation process requires global static analysis to emit the application code.
+
 ## Rendering Architecture
 
 What is a rendering architecture? It is the pair *compiler:runtime*. Angular framework is composed by two main parts:
@@ -92,7 +106,52 @@ The amount of memory required to render the DOM is *proportional* to the size of
 The compiled template component references some instructions of the Angular runtime which holds the implementation.
 {: .notice--info}
 
-## Angular Ivy Compilation Example
+## Enable Angular Ivy
+
+Ivy can be enable in an existing project with latest Angular version but also directly scaffold a project with Ivy.
+
+### Enable Ivy in an existing project
+
+Having an existing [Angular (8.1.x)](https://angular.io/guide/ivy) project run:
+
+```bash
+$ ng update @angular/cli@next @angular/core@next
+```
+
+both the Angular core and the CLI will be updated at the latest release candidate. One interesting thing to notice is the `"aot": true` in the `angular.json` *workspace configuration file*:
+
+> AOT compilation with Ivy is faster and should be used by default.
+
+[Angular docs](https://angular.io/guide/ivy)
+{: .small}
+
+Then add the angular compiler options in the `tsconfig.app.json`:
+
+```javascript
+{
+  "compilerOptions": { ... },
+  "angularCompilerOptions": {
+    "enableIvy": true
+  }
+}
+```
+
+### New project with Ivy
+
+To start a new project with Ivy run:
+
+```bash
+$ new my-app --enable-ivy
+```
+
+### Disable Ivy
+
+To disable Ivy:
+
+- in `angular.json` set `"aot": false`;
+- in `tsconfig.app.json` remove the `angularCompilerOptions` option or set `"enableIvy": false`.
+
+## Angular Ivy Compilation
 
 Consider the following *Hello World* Angular component:
 
@@ -142,73 +201,63 @@ AppComponent.ngComponentDef = defineComponent({
 
 The Angular decorators are compiled into *static fields*{: .italic-red-text} in the decorated class. So `@Component` becomes `ngComponentDef` static field. Back to View Engine, the `ngc` compiler produces `.ngfactory` separated files for each component and modules. With Ivy the code produced by the compiler is move into *component class static fields*.
 
-The `elementStart()`, `elementEnd()`, etc are the component referenced instructions, *every component is its own factory*, the framework does not interpret the component.
+The `elementStart()`, `elementEnd()`, etc are the *component referenced instructions*, *every component is its own factory*{: .italic-red-text}, the framework does not interpret the component.
 
-All the not referenced instructions at compile time are then removed from the final application bundle.
+All the *not referenced*{: .italic-red-text} instructions at compile time are removed from the final application bundle.
 
 ![image-center](/assets/images/posts/angular-ivy-intro/incremental-dom.png ){: .align-center}
 
 **Tip**
-The View Engine runtime is a *single monolith interpreter* that is not tree-shakable and has to be entirely shipped to the browser. Unlike, Angular Ivy runtime is an *instruction set*{: .italic-red-text} that is a *set of rendering functions* like an assembly language for templates.
+The View Engine runtime is a *single monolith interpreter* that is not tree-shakable and has to be entirely shipped to the browser. Differently, *Angular Ivy runtime* is an *instruction set*{: .italic-red-text} that is a *set of rendering functions*{: .italic-red-text} like an assembly language for templates.
 {: .notice--info}
 
 ## What Angular Ivy enables
 
-Angular Ivy is an enabler. Simplifying how Angular works internally and the compilation process resolves current View Engine limitations and makes Angular easily extensible to new features.
+*Angular Ivy is an enabler.*{: .italic-red-text} Simplifying how Angular works internally and the compilation process resolves current View Engine limitations and makes Angular easily extensible to new features.
 
-The new Ivy engineering has been driven by three main principles: three-shaking, locality and flexibility.
+The new Ivy engineering has been driven by three main goals: *three-shaking, locality and flexibility*.
 
 ### Tree-shaking
 
-Tree-shaking is the operation of removing *dead code*{: .italic-red-text} from the bundle so if the application does not use all the functions from a library, they can be omit from the bundle making it smaller.
+Tree-shaking is the operation of removing *dead code*{: .italic-red-text} from the bundle so if the application does not reference some of the runtime rendering function, they can be omit from the bundle making it smaller.
 
-Dead code comes from libraries, Angular included. Angular CLI is powered by Webpack uglify plugin as tree-shaker that, in turn, receives information from *Angular Build Optimizer Plugin* about which code is used and which not. This plugin, after compilation, can gather information about component referenced instructions so can instruct Uglify about what to include/exclude in/from the bundle.
-
-Angular compiler simply does not emit those instructions so they are not included into the bundle.
-
-**Tip**
-Webpack creates a bundle for the application and a bundle for vendor. Referenced instruction implementations are bundled in the vendor bundle, the non-referenced ones, since not emitted will not be included in it.
-{: .notice--info}
+Dead code comes from libraries, Angular included. Angular CLI is powered by Webpack uglify plugin as tree-shaker that, in turn, receives information from *Angular Build Optimizer Plugin* about which code is used and which not. Angular compiler simply does not emit those instructions, the plugin can gather information about component referenced instructions so can instruct Uglify about what to include/exclude in/from the bundle.
 
 While the `@angular/core` framework is tree-shakable, the View Engine runtime is not, it cannot be broken into small pieces and this is mainly due to the static `Map<Component, ComponentFactory>` variable.
 
 ### Incremental compilation
 
-The Angular compilation pipeline started by `ng build prod --aot` is composed by five phases where the `tsc` and the `ngc` generates the template factories. `ngc` compiles the libraries as well. Ivy enables *Incremental compilation* that is libraries can be compiled and deployed on npm.
+The Angular 8 compilation pipeline started by `ng build prod --aot` is composed by five phases where the `tsc` and the `ngc` generates the *template factories*. `ngc` compiles the libraries as well. Ivy enables *Incremental compilation* that is libraries can be compiled and deployed on npm.
 
 ### Locality
 
-*Locality is a rule*. Ivy enable an Angular application to safely refer to components and directives *public API*, no more needed to know much about dependencies since *extra information* are added to `.d.ts` files.
+Currently, Angular relies on *global compilation*{: .italic-red-text}, the compilation process requires a global static analysis of the entire application to combine different compilation outputs (application, libraries from the monorepo and libraries from npm) before emitting the bundle. Moreover it is really complex to combine AOT libraries into a JIT application.
 
-#### Example
+**Tip**
+The compiler should use only information provided by component decorator and its class and nothing else. This simplifies the overall compilation process, no more `component.metadata.json` and `component.ngfactory.json` that requires complex management in the compilation pipeline.
+{: .notice--info}
 
-Consider the following component snippet:
+*Locality is a rule*. Ivy compilation introduces the concept of *component/directive public API*{: .italic-red-text}: an Angular application can *safely refer to components and directives public API*, no more needed to know much about dependencies since *extra information* are added to `.d.ts` component files.
 
-```javascript
-@Input('property') field: string;
-```
+#### Ivy library compilation example
 
-where `property` is the name part of the public API while `field` is the private name, *an implementation detail*. Since it can change, the code must be compile every time, so for this reason current Angular version must rely on *global compilation*.
+Add a library to the monorepo where your application is running `ng generate library mylib`.
 
-Angular Ivy instead relies on the *public API*, so library code can be compiled and safely shipped to npm.
-
-### Flexibility
-
-// todo
-
-tsickle@0.37.1 requires a peer of typescript@~3.6.4 but none is installed. You must install peer dependencies yourself.
-
-## How Ivy libraries build changed
-
-### Setup of the workspaces
-
-Two workspaces have been created, one based on Angular version `8.2.9` and the other one on `9.0.0-rc.5`. Then the same library have been added to both of them:
+Compile the library with `ng build mylib`, the following files are produced:
 
 ```bash
-$ ng generate library mylib
+├── bundles
+├── ...
+├── lib
+│   ├── mylib.component.d.ts
+│   ├── mylib.module.d.ts
+│   └── mylib.service.d.ts
+├── mylib.d.ts
+├── package.json
+└── public-api.d.ts
 ```
 
-and then built it. First thing to notice is the new message displayed in version 9 due to Ivy activated by default:
+Notice as well that this new message is displayed in version 9 due to Ivy activation:
 
 ```bash
 Building Angular Package
@@ -218,7 +267,9 @@ Read more here: https://next.angular.io/guide/ivy#maintaining-library-compatibil
 ******************************************************************************
 ```
 
-This is the placeholder component generated by the Angular CLI:
+##### Generated component
+
+This is the component generated by the Angular CLI:
 
 ```javascript
 import { Component, OnInit } from '@angular/core';
@@ -238,38 +289,11 @@ export class MylibComponent implements OnInit {
 }
 ```
 
-#### Angular 8 library build
+##### Compiled library code
 
-```bash
-├── bundles
-├── ...
-├── lib
-│   ├── mylib.component.d.ts
-│   ├── mylib.module.d.ts
-│   └── mylib.service.d.ts
-├── mylib.d.ts
-├── mylib.metadata.json
-├── package.json
-└── public-api.d.ts
-```
+The metadata file `mylib.metadata.json` is not generated anymore, *metadata* are now part of the *definition files*{: .italic-red-text}.
 
-#### Angular 9 library build
-
-```bash
-├── bundles
-├── ...
-├── lib
-│   ├── mylib.component.d.ts
-│   ├── mylib.module.d.ts
-│   └── mylib.service.d.ts
-├── mylib.d.ts
-├── package.json
-└── public-api.d.ts
-```
-
-### Metadata inside the definition files
-
-The metadata `mylib.metadata.json` is not generated anymore, metadata are now part of the definition file of the component:
+Definition file of the component:
 
 ```javascript
 import { OnInit } from "@angular/core";
@@ -282,7 +306,7 @@ export declare class MylibComponent implements OnInit {
 }
 ```
 
-The same happens for modules and services
+Definition file of the module:
 
 ```javascript
 import * as i0 from "@angular/core";
@@ -293,6 +317,8 @@ export declare class MylibModule {
 }
 ```
 
+and definition file of the service:
+
 ```javascript
 import * as i0 from "@angular/core";
 export declare class MylibService {
@@ -302,7 +328,7 @@ export declare class MylibService {
 }
 ```
 
-### Modify the component
+##### Add a property to the component
 
 Add to the library component an input field:
 
@@ -326,7 +352,7 @@ export class MylibComponent implements OnInit {
 }
 ```
 
-The alias `phone-number` has been added to the *input property*{: .italic-red-text}, the compiler generates the following definition file:
+The alias `phone-number` will be added to the *input property*{: .italic-red-text} providing additional metadata for the public API. The compiler generates the following definition file:
 
 ```javascript
 import { OnInit } from '@angular/core';
@@ -340,7 +366,34 @@ export declare class MylibComponent implements OnInit {
 }
 ```
 
-Comparing the two `mylib.component.d.ts` is interesting to notice how the component definition metadata has changed to include the *input property*
+> Decorator that marks a class field as an input property and supplies configuration metadata. The input property is bound to a DOM property in the template. During change detection, Angular automatically updates the data property with the DOM property's value.
+
+<cite>Input decorator</cite>[Angular docs](https://angular.io/api/core/Input)
+{: .small}
+
+The property `phone-number` is the name part of the public API while `phone` is the private name, *an implementation detail*{: .italic-red-text}. Since it can change, the code must be compile every time to emit, in case, an error if there is a property name mismatch. For this reason current Angular version must rely on *global compilation*.
+
+Angular Ivy instead relies on the *public API*, so library code can be compiled and safely shipped to npm.
+
+##### Browser property
+
+![image-center](/assets/images/posts/angular-ivy-intro/input-property.png ){: .align-center}
+
+### Flexibility
+
+// todo
+
+tsickle@0.37.1 requires a peer of typescript@~3.6.4 but none is installed. You must install peer dependencies yourself.
+
+## How Ivy libraries build changed
+
+### Setup of the workspaces
+
+
+### Metadata inside the definition files
+
+
+
 
 - bundles
   - runtime

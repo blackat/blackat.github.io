@@ -6,7 +6,7 @@
 
 // Custom Blue Style.
 $global-font-family: "Source Sans Pro", sans-serif !important;
-$link-color: #ff5370;
+$link-color: #5DADE2;
 $highlighted-color: #fd4445;
 /*************************************************
     syntax highlighting ($base16)
@@ -121,6 +121,14 @@ div.highlighter-rouge::before {
 
 tt,code,kbd,samp,pre {
   font-family: SFMono-Regular,Menlo,monospace;
+}
+
+.language-bash .highlight {
+  color: white;
+}
+
+.language-bash .highlight .nv {
+  color: white;
 }
 
 /*************************
