@@ -1,8 +1,8 @@
 ---
 layout: single
-title: "Angular Ivy Next"
+title: "Angular Ivy Introduction"
 date: '2019-11-10'
-last_modified_at: '2019-11-10'
+last_modified_at: '2019-12-08'
 comments: true
 categories:
   - angular, ivy
@@ -18,19 +18,21 @@ Angular Ivy is the new *rendering architecture* that comes, by default, with ver
 
 Currently Angular stable version is 8.3.9 and Angular 9 is in RC4.
 
+__Disclaimer__
+The post contains the thoughts of a preliminary investigation on how Angular works reading the some parts of the source code, debugging a simple application and reading how the compiler works. Some terms or definition could be wrong.
+{: .notice--danger}
+
 ## Lingo
 
-- rendering architecture
-- runtime rendering function set/instruction set
-- runtime/compiler
-- virtual DOM
-- incremental DOM
-- View Engine
+- *Rendering architecture:*{: .italic-violet-text} compiler and runtime engine pipeline that allows an Angular application to be executed.
+- *Runtime rendering function set/instruction set:*{: .italic-violet-text} set of JavaScript functions understandable by runtime, templates and decorators are transformed into sequence of instructions.
+- *Virtual DOM and incremental DOM:*{: .italic-violet-text} techniques to create and update a component in the DOM.
+- *View Engine:*{: .italic-violet-text} rendering architecture introduced in Angular 4,
 - `angular.json` is the workspace or build configuration file.
 - `tsconfig.app.json` is the project configuration file.
 - `.ngfactory.js` suffix for decorator factory files, class decorators like `@Component` are translated by the compiler into external files.
-- Locality: compiler should use only information from the component decorator and its class.
-- Global compilation: compilation process requires global static analysis to emit the application code.
+- *Locality:*{: .italic-violet-text} compiler should use only information from the component decorator and its class.
+- *Global compilation:*{: .italic-violet-text} compilation process requires global static analysis to emit the application code.
 
 ## Rendering Architecture
 
@@ -49,7 +51,7 @@ Currently, Angular 8 uses as rendering architecture called *View Engine*:
   - *three-shakable*  the `Hello World` application does not required the full Angular runtime and wil be bundled in only 4.7 KB;
   - *incremental compilation* is not possible so the compilation is faster than ever and `--aot` can be now used even during development mode (advice from Angular team).
 
-> "Ivy is an enabler."
+> Ivy is an enabler.
 
 <cite>Igor Minar</cite> - Angular team
 {: .small}
@@ -231,7 +233,7 @@ The Angular 8 compilation pipeline started by `ng build prod --aot` is composed 
 
 ### Locality
 
-Currently, Angular relies on *global compilation*{: .italic-red-text}, the compilation process requires a global static analysis of the entire application to combine different compilation outputs (application, libraries from the monorepo and libraries from npm) before emitting the bundle. Moreover it is really complex to combine AOT libraries into a JIT application.
+Currently Angular relies on *global compilation*{: .italic-red-text}. The compilation process requires a global static analysis of the entire application to combine different compilation outputs (application, libraries from the monorepo and libraries from npm) before emitting the bundle. Moreover it is really complex to combine AOT libraries into a JIT application.
 
 **Tip**
 The compiler should use only information provided by component decorator and its class and nothing else. This simplifies the overall compilation process, no more `component.metadata.json` and `component.ngfactory.json` that requires complex management in the compilation pipeline.
@@ -368,7 +370,7 @@ export declare class MylibComponent implements OnInit {
 
 > Decorator that marks a class field as an input property and supplies configuration metadata. The input property is bound to a DOM property in the template. During change detection, Angular automatically updates the data property with the DOM property's value.
 
-<cite>Input decorator</cite>[Angular docs](https://angular.io/api/core/Input)
+<cite>Input decorator</cite> - [Angular docs](https://angular.io/api/core/Input)
 {: .small}
 
 The property `phone-number` is the name part of the public API while `phone` is the private name, *an implementation detail*{: .italic-red-text}. Since it can change, the code must be compile every time to emit, in case, an error if there is a property name mismatch. For this reason current Angular version must rely on *global compilation*.
@@ -383,7 +385,7 @@ Basically
 
 > When the browser loads the page, it “reads” (another word: “parses”) the HTML and generates DOM objects from it. For element nodes, most standard HTML attributes automatically become properties of DOM objects.
 
-<cite>Attributes and properties</cite>[javascript.info](https://javascript.info/dom-attributes-and-properties)
+<cite>Attributes and properties</cite> - [javascript.info](https://javascript.info/dom-attributes-and-properties)
 
 Angular compiler transforms the decorators and the templates into JavaScript instructions not only to create element into the DOM but also *extra content properties and attributes* used by runtime to *"keep alive"* the application. 
 

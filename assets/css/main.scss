@@ -6,8 +6,13 @@
 
 // Custom Blue Style.
 $global-font-family: "Source Sans Pro", sans-serif !important;
-$link-color: #5DADE2;
-$highlighted-color: #fd4445;
+$link-color: #2980B9;
+$highlighted-color: #E74C3C;
+$blue: #2980B9;
+$light-blue: #EBF5FB;
+$red: #E74C3C;
+$light-red: #FDEDEC;
+$dark-gray: #34495E;
 /*************************************************
     syntax highlighting ($base16)
 *************************************************/
@@ -88,6 +93,12 @@ a {
   font-style: normal;
 }
 
+.italic-violet-text {
+  color: #8E44AD;
+  font-weight: 600;
+  font-style: normal;
+}
+
 /*************************
     Inline code
 *************************/
@@ -135,7 +146,7 @@ tt,code,kbd,samp,pre {
     Blockquote
 *************************/
 blockquote {
-  border-left-color: #566573;
+  border-left-color: $dark-gray;
 }
 
 /*************************
@@ -177,8 +188,8 @@ p strong:first-child {
 }
 
 .notice--info {
-  border-left: 8px solid #5DADE2;
-  background-color: #EBF5FB;
+  border-left: 8px solid $blue;
+  background-color: $light-blue;
   font-size: 0.9em !important;
   box-shadow: none;
   border-radius: 0px;
@@ -188,17 +199,20 @@ p strong:first-child {
   }
 
   a {
-    color: #2e86c1;
+    color: $blue;
   }
 
   strong:first-child {
-    color: #2e86c1;
+    color: $blue;
   }
 }
 
 .notice--warning {
-  background-color: #f9e79f;
+  border-left: 8px solid #F1C40F;
+  background-color: #FCF3CF;
   font-size: 0.9em !important;
+  box-shadow: none;
+  border-radius: 0px;
 
   code {
     background-color: #fcf3cf;
@@ -216,6 +230,8 @@ p strong:first-child {
 .notice--success {
   background-color: #a2d9ce;
   font-size: 0.9em !important;
+  box-shadow: none;
+  border-radius: 0px;
 
   code {
     background-color: #d0ece7;
@@ -227,8 +243,11 @@ p strong:first-child {
 }
 
 .notice--danger {
-  background-color: #f1948a;
+  border-left: 8px solid $red;
+  background-color: $light-red;
   font-size: 0.9em !important;
+  box-shadow: none;
+  border-radius: 0px;
 
   code {
     background-color: #f5b7b1;
