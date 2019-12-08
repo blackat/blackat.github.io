@@ -377,6 +377,16 @@ Angular Ivy instead relies on the *public API*, so library code can be compiled 
 
 ##### Browser property
 
+> The input property is bound to a DOM property in the template.
+
+Basically
+
+> When the browser loads the page, it “reads” (another word: “parses”) the HTML and generates DOM objects from it. For element nodes, most standard HTML attributes automatically become properties of DOM objects.
+
+<cite>Attributes and properties</cite>[javascript.info](https://javascript.info/dom-attributes-and-properties)
+
+Angular compiler transforms the decorators and the templates into JavaScript instructions not only to create element into the DOM but also *extra content properties and attributes* used by runtime to *"keep alive"* the application. 
+
 ![image-center](/assets/images/posts/angular-ivy-intro/input-property.png ){: .align-center}
 
 ### Flexibility
@@ -384,20 +394,6 @@ Angular Ivy instead relies on the *public API*, so library code can be compiled 
 // todo
 
 tsickle@0.37.1 requires a peer of typescript@~3.6.4 but none is installed. You must install peer dependencies yourself.
-
-## How Ivy libraries build changed
-
-### Setup of the workspaces
-
-
-### Metadata inside the definition files
-
-
-
-
-- bundles
-  - runtime
-  - library
 
 ## Angular Ivy Build Pipeline
 
