@@ -22,6 +22,10 @@ __Disclaimer__
 The post contains the thoughts of a preliminary investigation on how Angular works reading the some parts of the source code, debugging a simple application and reading how the compiler works. Some terms or definition could be wrong.
 {: .notice--danger}
 
+## Slides
+
+This post comes along with a [presentation](https://blackat.github.io/presentations/docs/angular-ivy/index.html) written in markdown, rendered via [`reveal.js`](https://github.com/hakimel/reveal.js/) and available on GitHub.
+
 ## Lingo
 
 - *Rendering architecture:*{: .italic-violet-text} compiler and runtime engine pipeline that allows an Angular application to be executed.
@@ -79,6 +83,10 @@ Incremental DOM enables *better bundle size and memory footprint*{: .italic-red-
 React and Vue are based on the concept of *Virtual DOM* to create a component and re-render it when change detection happens.
 
 Render the DOM is a very expensive operation, when a component is added to the DOM or changes happen, the repaint operation has to take place. Virtual DOM strategy aims to reduce the amount of work on the real DOM and so the number of time the user interface needs to be repainted.
+
+**Tip**
+The end user sometimes does not realize the complexity behind the rendering of a user interface. A simple click can generate HTTP requests, changes in the component, changes in other components and so on. Single change for the user can be a complex set of changes that must be applied into the DOM.
+{: .notice--info}
 
 DOM manipulations happens every time a new component is going to be added, removed or changed from the DOM, so instead of operating directly on the DOM it operates on a JSON object called Virtual DOM. When a new component is added or an existing one removed, a new Virtual DOM is created, the node added or removed and the difference between Virtual DOMs is computed. A sequence of transformations is applied to the real DOM.
 
