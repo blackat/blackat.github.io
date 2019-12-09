@@ -393,31 +393,33 @@ Angular compiler transforms the decorators and the templates into JavaScript ins
 
 ### Flexibility
 
-// todo
-
-tsickle@0.37.1 requires a peer of typescript@~3.6.4 but none is installed. You must install peer dependencies yourself.
+Angular Ivy is more flexible that View Engine, if new *features* are introduced in Angular new *instructions* will be implemented in the set. Ivy is easier to be extended and optimized.
 
 ## Angular Ivy Build Pipeline
 
 The compilation of anf Angular application is just half of the process since the libraries the application depends on have to be make compatible with the *new runtime*.
 
-`ngcc` (Angular compatibility compiler) is a new compiler that convert and compile the libraries. Libraries compatible with `ViewEngine`, the previuos *rendering engine* of Angular, are converted into Ivy instructions so that the *"library can partecipate in the Ivy runtime"* and be fully compatible.
+`ngcc` (Angular compatibility compiler) is a new compiler that convert and compile the libraries. Libraries compatible with `ViewEngine`, the previous *rendering engine* of Angular, are converted into Ivy instructions so that the *"library can participate in the Ivy runtime"* and be fully compatible.
 
-The new compiler has been implemented to make libraries compatible with the new format without oblige mantainers to rewrite important parts of them and especially becase not all the applications need to be compatible with Ivy.
+The new compiler has been implemented to make libraries compatible with the new format without obliging maintainers to rewrite important parts of them and, moreover, not all the applications need to be compatible with Ivy.
 
-In Angular version 9 Ivy is enable for application only and `ngcc` is used to convert existing libraries making them Ivy compatible. Over time application will start to become more and more Ivy compatible and so the libraries, then `ngcc` will not be anymore necessary. Libraries can be coverted on the fly into Ivy compatible libraries during the *build or installation process*.
+In Angular version 9 Ivy is enable for application only and `ngcc` is used to convert existing libraries making them Ivy compatible. Over time application will start to become more and more Ivy compatible and so the libraries, then `ngcc` will not be anymore necessary. Libraries can be converted *on the fly* into Ivy compatible libraries during the *build or installation process*.
 
-Incremental transition from version 9 to version 11 where `ngcc` will be only for some few cases. (add img)
+Incremental transition from version 9 to version 11 will make `ngcc` only required for some few cases:
 
-- Angular 9: app on Ivy (opt-out) and libraries VE compatible
-- Angular 10: stabilise Ivy instruction set and libraries ship Ivy code
-- Angular 11: `ngcc` a backup solution for obsolete libraries or not been updated yet
+| Angular version  | ngcc           |
+| :--------------: |------------------------------------------------------ |
+| 9                |app on Ivy (opt-out) and libraries VE compatible       |
+| 10               |stabilize Ivy instruction set, libraries ship Ivy code |
+| 11               |`ngcc` backup for obsolete libraries or not updated yet|
 
 `ngcc-validation` [project](https://github.com/angular/ngcc-validation) is the way Angular team test the libraries compatibility.
 
-Ivy is not just about improving the built time and the size but also a predectible merging of styles on the component. Angualr since version 2 has a compenent lazy loading feature but just at *router level*. To do at *component level* requires a lot of boilerplate code and some patches to make it work.
+## Component lazy loading feature
 
-A simple example is just click on an image, lazy load the bundle and add the component to the view improving then the speed of an application. Fro the time being still need to pass via the `ComponentFactoryResolver` to load the component, ideally it will be:
+Angular is enabler, it will allow more improvement about performance not only for the build but also for the application. Since version 2 Angular has a *component lazy loading feature*{: .italic-red-text} but just at *router level*: .italic-red-text}. Lazy loading at *component level* requires a lot of boilerplate code and some patches to make it work.
+
+With Angular Ivy will be much simpler. Consider the following example: click on an image, lazy load the bundle and add the component to the view. *Lazy loading improves the speed of an application.* *Ideally*{. .italic-red-text} it will be:
 
 ```javascript
 @Component(...)
@@ -436,69 +438,70 @@ export class AppComponent{
 }
 ```
 
-So basically avoid to resolve the lazy component into a factory as needed today:
+View Engine obliges to pass via the `ComponentFactoryResolver` to resolve the lazy component into a factory and to load it:
 
 ```javascript
 this.viewContainer.createComponent(this.cfr.resolveComponentFactory(LazyComponent));
 ```
 
-## Try Ivy
+## Bundle size
 
-Enable Ivy on your project running `ng update @angular/cli@next @angular/core@next`, if something goes wrong open an issue in the bug report :-)
-Being a library author compile with View Engine and use the `ng-packagr`, compatibility will be ensured.
+To evaluate the bundle size improvement, the Angular team uses a *metric*{: .italic-red-text} the *Hello World* application. Building with Angular Ivy, the final minimized bundle is ~4.5kB and ~2.7kB with Closure Compiler.
 
-## Deep dive into the Angular compiler
+*Angular Elements* can be then bundled more efficiently and, moreover, Ivy is ready for future bundlers/optimizers.
 
-> Why does Angular have a compiler at all?
-> Alex Rickabaugh - Angular Connect 2019
+## Debugging
 
-Basically what the compiler actually doing? The goal is to make an application smaller and faster.
+A new API has been added to the global `ng` object. In the ChromeDevTools just open the console and type `ng` to see the new options:
 
-> Main job of the compiler is to turn the template you write into the code that runs at runtime.
+![image-center](/assets/images/posts/angular-ivy-intro/ivy-debug-01.png ){: .align-center}
 
-In Angular the developer write templates *declaratively*, what to render, the binding, etc. *but not how it happens at runtime*, there is not description about how the change detection mechanism works. The browser does not udnerstand the *declarative template* so it has to be translated into something a browser can understand.
+Consider to have a `<mat-drover></mat-drover>` component from the Angular Material library, it is possible to directly act on the component from the console (thanks to Juri Strumpflohner for the example in [his tutorial](https://juristr.com/blog/2019/09/debugging-angular-ivy-console/)):
 
-The compiler takes the *declarative Angular syntax* and turn it into *imperative code*.
+```bash
+// grab the component instance of the DOM element stored in $0
+let matDrawer = ng.getComponent($0);
 
-Why, again, a compiler is required? not possible to do by hand?
+// interact with the component's API
+matDrawer.toggle();
 
-- lot of boilerplate code, better to focus on the business logic than how things work under the hood;
-- Angular team can optimize and improve by release w.r.t. browser evolution the iperative code.
+// trigger change detection on the component
+ng.markDirty(matDrawer);
+```
 
-### Compiler can transform in two ways: JIT and AOT
+From the Elements tab just select the element of the debug action, a `$0` will appear close to it, it can be used as selector/placeholder for the element in the console.
 
-#### JIT (development mode)
+![image-center](/assets/images/posts/angular-ivy-intro/ivy-debug-02.png ){: .align-center}
 
-Imperative code is generated at runtime. TypeScript is transpiled (`tsc`) into JavaScript, decorators (`@Component`) invoke the compiler.
+`NgProbe` will not be probably supported anymore:
 
-#### AoT
+> In Ivy, we don't support NgProbe because we have our own set of testing utilities with more robust functionality.
+>
+> We shouldn't bring in NgProbe because it prevents DebugNode and friends from tree-shaking properly.
 
-Imperative code is generated at build time. `ngc` compiles TypeScript code into JavaScript and pre-compile the decorators into imperative code to be rendered in the browser avoiding the cost of runtime compilation.
+<cite>Platfrom browser</cite> - [Angular source code](https://github.com/angular/angular/blob/master/packages/platform-browser/src/dom/debug/ng_probe.ts#L40-L47)
+{: .small}
 
-### Angular architecture
+## Conclusions
 
-To understand how the Angular compiler works and the all process, it is important to know how TypeScript works since the *Angular compiler is based on TypeScript*.
+Angular team has done an amazing job, it was really a pleasure to attend the Angular Connect 2019 and see the improvement done on the new rendering architecture introduced last year.
 
-The TypeScript compiler has *three phases*: Program Creation, Type Checking and Emit. The Angular compiler in built on top of the TypeScript one.
+Development can be done now with `aot` compilation enabled by default to avoid possible mismatches between the development and the production environment.
 
-Angular compiler uses the TypeScript ones plus additional phases. Let's see all the *compilation phases*.
+Another interesting point is Angular Elements. I think the project can now really speeds up thanks to the new compiler and rendering engine. Currently it is not possible to create a library project and compiler it as web components, this will really a killing feature. Moreover the generated web components have *"too much Angular inside"*, they are a bit too big, Ivy should reduce the amount of the framework that wraps an Angular component.
 
-#### 1. Program creation (TypeScript)
-
-TypeScript process to discover all the application source files, it starts with the `tsconfig.json`. TypeScript gets initial files of the application, then via the `import` statements discover other files in the application itself or in the libraries. Once all the files have been collected, TypeScript can understand correctly check the types of the application.
-
-In the Angular compiler some more is added to this process, some extra steps that allows, for instance, to import `ngfactory` files to do some adavnced things in Angular.
-
-#### 2. Analysis (Angular)
-
-In this phase the Angular compiler takes all the TS files, class by class, and looks, one by one, for the classes decorated with Angular decorators, basically look for classes with *"Angular things"*. For instance it understands if something is a component or part of a template. The process is gathering information *in isolation*, for instance it gather information about a *component* but it does not know the *module* yet.
-
-#### 3. Resolve (Angular)
-
-Once all the information of classes has been collected, it looks again at the whole application. The compiler now looks at things in a larger picture.
+Really impressive is the lazy loading that could be achieved in a very simple manner, powerful but keeping the readability of the code simple.
 
 ## References
 
 [ac-2019-keynote]: https://www.youtube.com/watch?v=6Zfk0OcFGn4&list=PLAw7NFdKKYpE-f-yMhP2WVmvTH2kBs00s
 [ac-2019-alex-rickabaugh]: https://www.youtube.com/watch?v=anphffaCZrQ&list=PLAw7NFdKKYpE-f-yMhP2WVmvTH2kBs00s&index=2
 [nrwl-ivy]: https://blog.nrwl.io/understanding-angular-ivy-incremental-dom-and-virtual-dom-243be844bf36
+
+- [Angular Connect 2019 Keynote][ac-2019-keynote]
+- [Deep Dive into the Angular Compiler][ac-2019-alex-rickabaugh]
+- [Understanding Angular Ivy][nrwl-ivy]
+- [Opting into Angular Ivy](https://angular.io/guide/ivy)
+- [A Deep, Deep, Deep, Deep, Deep Dive into the Angular Compiler](https://medium.com/angular-in-depth/a-deep-deep-deep-deep-deep-dive-into-the-angular-compiler-5379171ffb7a)
+- [Ivy engine in Angular](https://indepth.dev/ivy-engine-in-angular-first-in-depth-look-at-compilation-runtime-and-change-detection/)
+- [Debugging Angular Ivy Applications from the Devtools Console](https://juristr.com/blog/2019/09/debugging-angular-ivy-console/)

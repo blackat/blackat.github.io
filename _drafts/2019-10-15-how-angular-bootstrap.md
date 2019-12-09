@@ -1,6 +1,6 @@
 ---
 layout: single
-title: "Angular Ivy Primer"
+title: "How Angular Bootstraps"
 date: '2019-10-15'
 last_modified_at: '2019-10-15'
 comments: true
