@@ -1,6 +1,6 @@
 ---
 layout: single
-title: "Angular Ivy Introduction"
+title: "Angular Ivy: a detailed introduction"
 date: '2019-11-10'
 last_modified_at: '2019-12-09'
 comments: true
