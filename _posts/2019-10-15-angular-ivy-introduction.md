@@ -2,10 +2,9 @@
 layout: single
 title: "Angular Ivy Introduction"
 date: '2019-11-10'
-last_modified_at: '2019-12-08'
+last_modified_at: '2019-12-09'
 comments: true
-categories:
-  - angular, ivy
+categories: angular
 tags:
   - [angular, ivy]
 toc: true
