@@ -59,7 +59,7 @@ Currently, Angular 8 uses as rendering architecture called *View Engine*:
 <cite>Igor Minar</cite> - Angular team
 {: .small}
 
-The incremental DOM is the [foundation of the new rendering engine][nrwl-ivy]
+The incremental DOM is the [foundation of the new rendering engine.][nrwl-ivy]
 
 ## Incremental DOM vs. Virtual DOM
 
