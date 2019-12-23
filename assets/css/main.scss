@@ -106,23 +106,40 @@ a {
   color: $link-color;
 }
 
-// Can be used to highlight a word as well, e.g. *word*{: .italic-red-text }
-.italic-red-text {
-  color: $red-dark;
+.italic-base-text {
   font-weight: 600;
   font-style: normal;
+}
+
+// Can be used to highlight a word as well, e.g. *word*{: .italic-red-text }
+.italic-red-text {
+  @extend .italic-base-text;
+
+  color: $red-dark;
 }
 
 .italic-violet-text {
+  @extend .italic-base-text;
+
   color: $violet-dark;
-  font-weight: 600;
-  font-style: normal;
 }
 
 .italic-blue-text {
+  @extend .italic-base-text;
+
   color: $blue-dark;
-  font-weight: 600;
-  font-style: normal;
+}
+
+.italic-yellow-text {
+  @extend .italic-base-text;
+
+  color: $yellow-dark;
+}
+
+.italic-lime-text {
+  @extend .italic-base-text;
+
+  color: $green-lime-dark;
 }
 
 /*************************

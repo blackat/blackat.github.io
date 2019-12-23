@@ -13,7 +13,7 @@ toc_label: "On this page"
 toc_icon: "list"
 toc_sticky: true
 ---
-The bootstrap sequence starts after the load of the `index.html` and the JavaScript bundles produced by Webpack. *Angular Runtime* create the environment, the platform, where the application can be started, finally the root component is rendered.
+The Angular bootstrap sequence starts after the load of the `index.html` and the JavaScript bundles produced by Webpack. *Angular Runtime* creates the *platform* where the *application* can be started and finally the root component is rendered.
 
 What follows is related to Angular View Engine and experimented on *Angular 8.2.9*{: .italic-red-text }.
 
@@ -46,11 +46,11 @@ This post comes along with a [presentation](https://blackat.github.io/presentati
 
 Hello Reader, this is a long post so feel free to skip certain sections I have used to introduce and give a more complete context to the Angular bootstrap sequence that is the goal :bowtie:
 
-The post starts with an introduction about the DOM and two *rendering strategies* used to speed up the page repainting. The *incremental DOM* strategies is the base of Angular rendering architecture.
+The post starts with an introduction about the DOM and two *rendering strategies*{: .italic-red-text} used to speed up the page repainting. The *incremental DOM* strategy is the base of the Angular rendering architecture.
 
-The `Welcome to Angular` simple application will help to introduce and talk about the *Angular compiler*, why and how the *Angular declarative syntax* is transformed into JavaScript code that can be executed by the *Angular runtime* in the browser. A deep look into the generated code and the Angular code will show how the framework creates the DOM element and react to change detection.
+The `Welcome to Angular` simple application will help to introduce and talk about the *Angular compiler*, why and how the *Angular declarative syntax* is transformed into JavaScript code that can be executed by the *Angular runtime* in the browser. A deep look into the generated code and the Angular source code will show how the framework creates the DOM element and answer to change detection.
 
-Some of the content and mechanisms has been changed with the introduction of Angular Ivy, the new rendering architecture.
+Some of the content and mechanisms has been changed with the introduction of the new rendering architecture called Angular Ivy.
 
 ## Browser DOM
 
@@ -59,7 +59,7 @@ Some of the content and mechanisms has been changed with the introduction of Ang
 <cite>MDN</cite> - Mozilla Developer Network
 {: .small}
 
-__Tip__
+**Tip**
 The HTML document is represented in object-oriented fashion, as objects in a logical tree, by the DOM that also provides the [API](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model) to manipulate those objects.
 {: .notice--info}
 
@@ -67,15 +67,15 @@ The DOM rendered gives the HTML page visible to the end user.
 
 ### DOM rendering is slow
 
-Being the DOM represented as a tree, it makes easier to change and update it. What the user sees is the result of the DOM rendering that is the *slow part*{: .italic-red-text }. More a component is complex more take time to be rendered.
+Being the DOM represented as a tree, it makes easier to change and update it. What the user sees is the result of the DOM rendering operation that is the *slow part*{: .italic-red-text }. More a page or a component is complex more could take time to render it.
 
-A page is usually made of many components, complex and non-complex. Every time one of them changes the all page needs to be re-rendered, a really expensive operation.
+A page is usually made of many components, complex and non-complex. Every time one of them changes the all page (or big part of it) needs to be re-rendered, a really expensive operation.
 
-__Tip__
+**Tip**
 Frequent DOM manipulations make the user interface slow since the re-painting of the user interface is the most expensive part. In general, it is something that is not considered when the page is going to be implemented. For instance changing visibility of an element forces the browser to verify/check visibility of all other dom nodes.
 {: .notice--info}
 
-Actions like changing visibility or the background of an element trigger a repaint, a simple click of the user could correspond to many different actions behind the scene and so many repainting actions slowing down the web page.
+Actions like changing visibility or the background of an element trigger a repaint. A simple click of the user could correspond to many different actions behind the scene and so many repainting actions slowing down the web page.
 
 Two different techniques have been developed to overcome the rendering issue for complex web applications: *Virtual DOM* and *Incremental DOM*.
 
@@ -85,7 +85,7 @@ The key idea is to *render the DOM the least possible*{: .italic-red-text }. Whe
 
 The Virtual DOM is a _tree_ as well, made of _nodes_ that are the page elements. When a new element is added/removed a new Virtual DOM is created, the _difference_ between the two trees is calculated.
 
-A transformations series is calculated to update the browser DOM so that it *matches*{: .italic-red-text } the new Virtual DOM. This transformations is both the minimal operations to be applied to the real DOM and the ones that reduce the performance cost of the DOM update.
+A transformations series is calculated to update the browser DOM so that it *matches*{: .italic-red-text } the latest new Virtual DOM. These transformations are both the minimal operations to be applied to the real DOM and the ones that reduce the performance cost of the DOM update.
 
 __Internals__
 The rendering process happens only on the *difference*. The *bulk changes* to be applied are optimized to improve the performance cost.
@@ -97,7 +97,7 @@ The rendering process happens only on the *difference*. The *bulk changes* to be
 
 The Virtual DOM is something *not official*, no specification is provided *differently* from DOM and shadow DOM.
 
-It is a *copy*{: .italic-red-text } of the original DOM as a *plain JavaScript object* so that it can be modified how many times we want without affecting the real DOM. The Virtual DOM can be divided in chunks so that it is easier to *diffing*{: .italic-red-text } the changes.
+It is a *copy*{: .italic-red-text } of the original DOM as a *plain JavaScript object (JSON)* so that it can be modified how many times we want without affecting the real DOM. The Virtual DOM can be divided in chunks so that it is easier to *diffing*{: .italic-red-text } the changes.
 
 #### Example
 
@@ -105,7 +105,7 @@ When a new item is added to an unordered list of elements a copy of the Virtual 
 
 The *diffing*{: .italic-red-text } process collects the differences between the two Virtual DOM objects so changes can be transformed in a bulk update against the real DOM.
 
-__Tip__
+**Tip**
 No distinction about _reflow_ (element layout that is position recalculation and geometry) and *repaint* (element visibility) has been done so far since most of the considered actions involve the repaint operation.
 {: .notice--info}
 
@@ -115,7 +115,7 @@ In React a user interface is made of a set of components, each component has a *
 
 Via the [observer pattern](https://www.baeldung.com/java-observer-pattern) React listens to *state change*{: .italic-red-text } to update the Virtual DOM. The *diffing*{: .italic-red-text } process makes React aware of which Virtual DOM objects have changed, *only*{: .italic-red-text } those objects will be updated in the real DOM.
 
-__Tip__
+**Tip**
 As developer you don't need to be aware about how DOM manipulation happens at each state change. React does the job optimizing the performance cost behind the scenes.
 {: .notice--info}
 
@@ -137,7 +137,7 @@ The key idea of the incremental DOM is:
 <cite>Victor Savkin</cite> - [Understanding incremental DOM](https://blog.nrwl.io/understanding-angular-ivy-incremental-dom-and-virtual-dom-243be844bf36)
 {: .small}
 
-Each component is then compiled into two main instruction sequences:
+Each component is then compiled into *two main instruction sequences*:
 
 - *view creation:*{: .italic-blue-text } invoked the first time the page is rendered, add the component to the DOM;
 - *change detection:*{: .italic-blue-text } invoked at every state change to update the component into the DOM.
@@ -145,7 +145,7 @@ Each component is then compiled into two main instruction sequences:
 The advantages of the Incremental DOM are a low memory footprint and a skinny interpreter/runtime tailored on the compiled application.
 
 **Angular Ivy**
-The Incremental DOM strategy is already present in the Angular View Engine. As it will be shown, each component is compiled into a creation function and an update function. Angular Ivy goes further, it allows the *tree-shaking* of the Angular runtime.
+The Incremental DOM strategy is already present in the Angular View Engine. As it will be shown, each component is compiled into a creation function and an update function. Angular Ivy goes further, it allows the *tree-shaking* of the Angular runtime that is not possible with the current rendering architecture.
 {: .notice--special}
 
 ## Angular compiler
@@ -154,10 +154,10 @@ An Angular application is mainly made by *Angular components* organized in a tre
 
 ### Angular component
 
-An Angular component is characterized by a class, *TypeScript code*{: .italic-red-text } that expresses the *logic*, and a decorator that allow to define some *metadata* such as the `selector`, the `template`, etc. The *HTML template*{: .italic-red-text } represents the *presentation layer* of the component and it is implemented using a specific *Angular declarative syntax*.
+An Angular component is characterized by a class, *TypeScript code*{: .italic-red-text } that expresses the *logic*, and a decorator that allow to define some *metadata*{: .italic-red-text } such as the `selector`, the `template`, etc. The *HTML template*{: .italic-red-text } represents the *presentation layer* of the component and it is implemented using a specific *Angular declarative syntax*.
 
 **Tip**
-When the developer write a component uses TypeScript and the Angular declarative syntax for the template to *bind*{: .italic-blue-text} a variable from the logic to the presentation layer and vice versa. Pay attention that *no change detection*{: .italic-blue-text} is required to be added. Change detection works at runtime thanks to the compiler that add it during the compilation phase.
+When the developer write a component uses TypeScript and the Angular declarative syntax for the template to *bind*{: .italic-blue-text} a variable from the logic to the presentation layer and vice versa. Pay attention that *no change detection*{: .italic-blue-text} is required to be added. Change detection works at runtime thanks to the compiler that adds it during the compilation phase.
 {: .notice--info}
 
 #### Example
@@ -191,31 +191,30 @@ A *template* is a bunch of HTML code with binding variables to *present*{: .ital
 
 The browser is the *execution environment*, it loads the application and executes it. Unfortunately it cannot execute an Angular component *as it is*{: .italic-red-text }.
 
-__Tip__ A browser can interpret JavaScript and render HTML but not in the *Angular declarative syntax*.
+**Tip** A browser can interpret JavaScript and render HTML but not if written using the *Angular declarative syntax*.
 Angular provides a compiler that, together with the TypeScript one, transforms *"everything in something else"* that a browser can understand.
 {: .notice--info}
 
 During the build of an Angular project, two compilers come into play with _different purposes_:
 
 - `tsc` is the TypeScript compiler and generates the JavaScript w.r.t. the target specified in the `tsconfig.json`, for instance `target: es2015`.
-- `ngc` is the Angular compiler that translates the templates and decorators into JavaScript. The Angular compiler can works in two different modes:
+- `ngc` is the Angular compiler that translates the templates and decorators into JavaScript. The Angular compiler can work in two different modes:
   - *Ahead-of-Time (AoT):*{: .italic-blue-text } work at build time so that the templates are bundled along with the application, suitable for production.
   - *Just-in-Time (JIT):*{: .italic-blue-text } templates are not pre-compiled, the compiler comes along with the application, it is loaded by the browser and does the work at runtime, suitable for development.
 
-__Tip__ During the development phase `ng serve` provides _live reload_ functionality.
-The process goes through `@ngtools/webpack`, compiled code is *not saved to disk*{: .italic-blue-text }, everything is consumed in memory via streams and emitters.
-{: .notice--info}
+**Internals** During the development phase `ng serve` provides _live reload_ functionality.
+The process goes through `@ngtools/webpack`, compiled code is *not saved to disk*{: .italic-violet-text }, everything is consumed in memory via streams and emitters.
+{: .notice--internals}
 
-### Angular vs. browser
+## Angular vs. browser
 
 What are then the *roles*{: .italic-red-text } of the browser and Angular?
 
 Once the Angular application has been *fully transformed into JavaScript* (HTML templates included), WebPack bundles it along with library dependencies in order to improve performance and load times.
 
-#### Browser
+### Browser
 
-The *browser role*{: .italic-red-text } is to load the `index.html` and to provide the execution environment, the render and the event loop:
-
+The *browser role*{: .italic-red-text } is to load the `index.html` and to provide the execution environment, the render and the event loop.
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -232,7 +231,7 @@ The *browser role*{: .italic-red-text } is to load the `index.html` and to provi
     <script src="main-es2015.js" type="module"></script>
 
     <!-- nomodule defer -->
-    <script src="runtime-es5.js" nomodule defer>
+    <script src="runtime-es5.js" nomodule defer></script>
     ...
   </body>
 </html>
@@ -240,16 +239,16 @@ The *browser role*{: .italic-red-text } is to load the `index.html` and to provi
 
 The scripts can be loaded both by modern browsers that supports ESM modules and by old ones that do not support modules via `nomodule defer` attributes.
 
-#### Angular
+### Angular
 
 Consider an Angular application made of only the component previously introduced. The `main-es2015.js` contains the fully bundled application while `runtime-es2015.js` is the Angular runtime. Finally third party libraries and styles.
 
-__Tip__
+**Tip**
 The transformed HTML template into JavaScript becomes a series of instructions that, once called, *render* the page building the components.
-Skipping some details, roughly an element is a factory function that uses the *injected Angular renderer* to render the element w.r.t. the *platform*.
+Skipping some details, roughly an element is a factory function that uses the *injected Angular renderer* to render the element w.r.t. the *browser platform*.
 {: .notice--info}
 
-The *Angular runtime* bootstraps the `app` module that, in turn, creates and renders the root element of the application `<app-root>`. The file `main-es2015.js` contains the *view definition factories*{: .italic-red-text } produced by the compiler.
+The *Angular runtime* bootstraps the `AppModule` that, in turn, creates and renders the root element of the application `<app-root>`. The file `main-es2015.js` contains the *view definition factories*{: .italic-red-text } produced by the compiler and enriched by Webpack.
 
 **Internals**
  If the browser platform is chosen, `@angular/platform-browser`, the element will be rendered creating the `HTML` code into the DOM via the `Document` interface: `document.createElement()`. When something changes, the element will update itself calling the update function.
@@ -261,7 +260,11 @@ The compilation process of View Engine produces `.metadata.json` and `.ngfactory
 
 ## Analyze the compiled code
 
-Let's see how to compile the application invoking *only*{: .italic-red-text } the `ngc` compiler and nothing else to inspect the compiled code easier.
+Let's see how to compile the application invoking *only*{: .italic-red-text } the `ngc` compiler and nothing else to inspect the compiled code easily and see where the generated JavaScript code invoke the DOM API to create the element.
+
+**Tip**
+The `HTML` template has been compiled into a sequence of JavaScript instructions that will be executed by the Angular runtime. The *goal*{: .italic-blue-text} of the coming sections is to find where the `document.createElement()` is invoked after the different Angular entities (platform, application and component) have been instantiated.
+{: .notice--info}
 
 ### Setup the compilation task
 
@@ -290,7 +293,7 @@ Create a new `Welcome to Angular` application via the Angular CLI.
 
 #### The module and the component
 
-The module is as follows:
+The *module* is as follows:
 
 ```javascript
 @NgModule({
@@ -298,8 +301,7 @@ The module is as follows:
     AppComponent
   ],
   imports: [
-    BrowserModule,
-    MylibModule
+    BrowserModule
   ],
   providers: [],
   bootstrap: [AppComponent]
@@ -313,7 +315,7 @@ then the *component* of the `Welcome to Angular` application:
 @Component({
   selector: 'app-root',
   template: `
-  <div style="text-align:center">
+    <div style="text-align:center">
       <h1>
         {% raw %}Welcome to {{ title }}!{% endraw %}
       </h1>
@@ -333,10 +335,10 @@ Run the command `npm run compile` and look into the folder `dist/out-tsc/src/app
 The Angular compiler has produced some files, skip the `.metadata` and `.d.ts` ones:
 
 ```bash
-app.module.js               // class metadata decorator has been transformed
-app.module.ngfactory.js     // module factory
-app.component.js            // class metadata decorator has been transformed
-app.component.ngfactory.js  // component factory
+app.module.js               // module class
+app.module.ngfactory.js     // module factory, transformed metadata decorator
+app.component.js            // component class
+app.component.ngfactory.js  // component factory, transformed metadata decorator
 ```
 
 ### Module factory function
@@ -354,10 +356,10 @@ var AppModuleNgFactory = i0.ɵcmf(i1.AppModule, [i2.AppComponent], function(_l) 
 ```
 
 __Warning__
-The functions produced by the Angular template compiler start with `ɵ` to clearly warn **to not use them** because for sure the code will change soon in the future.
+The functions produced by the Angular template compiler start with `ɵ` to clearly warn *to not use them*{: .italic-yellow-text} because for sure the code will change soon in the future.
 {: .notice--warning}
 
-The function `ɵcmf` stands for *create module factory* and the map between the name and the real function is defined in the following static map object [`Map<ExternalReference, any>`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/platform-browser-dynamic/src/compiler_reflector.ts#L70):
+The function `ɵcmf` stands for *create module factory*, the map between the name and the real function is defined in the following static map object [`Map<ExternalReference, any>`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/platform-browser-dynamic/src/compiler_reflector.ts#L70):
 
 ```javascript
 function createBuiltinExternalReferencesMap() {
@@ -368,15 +370,19 @@ function createBuiltinExternalReferencesMap() {
   return map;
 ```
 
-#### What is going to happen
+**Angular Ivy**
+The aforementioned map object is one of the reason why the View Engine is not tree-shakable. Angular Ivy should get rid off or change how this static map is defined to allow the runtime to be tree-shaked by the any open source tool.
+{: .notice--special}
 
-The compiler has transformed the decorators, `@NgModule` and `@Component`, into JavaScript instructions. Basically think that the TypeScript class has been transpiled into JavaScript and the `@Component` decorator that decorates the class is the factory that tell Angular runtime how to create the component into the DOM and how to update it. The `@NgModule` decorators will tell the Angular runtime how to instantiate the application module and get services injected.
+### What is going to happen
 
-The module factory function creates an application object that, in turn, bootstraps the application and the root component.
+The compiler has transformed the decorators, `@NgModule` and `@Component`, into JavaScript instructions. Now *"imagine"* that the TypeScript class has been transpiled into JavaScript and the `@Component` decorator that decorates the class became the factory that tell Angular runtime how to create the component into the DOM (*create view*) and how to update it (*change detection*). The `@NgModule` decorators will tell the Angular runtime how to instantiate the application module and get *service providers* injected.
+
+The *module factory function* will create an *application object* that, in turn, will bootstrap the *application module* and finally the *root component*.
 
 #### Module factory implementation
 
-The function implementation creates the [module factory object](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/entrypoint.ts#L35):
+The module factory function `ɵcmf` creates the [module factory object](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/entrypoint.ts#L35) `AppModuleNgFactory` previously shown. here the implementation:
 
 ```javascript
 export function createNgModuleFactory(
@@ -386,7 +392,7 @@ export function createNgModuleFactory(
     }
 ```
 
-and implements the [following interface](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/linker/ng_module_factory.ts#L60):
+it implements the [following interface](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/linker/ng_module_factory.ts#L60):
 
 ```javascript
 export abstract class NgModuleFactory<T> {
@@ -399,7 +405,7 @@ export abstract class NgModuleFactory<T> {
 
 The *module factory object* can create a *module* of type `AppModule` defined in the class `app.module.js`, that will bootstrap a component of type `AppComponent` defined in the file `app.component.js`.
 
-The `defFactory` is a *function* `ɵmod`, module definition, used by the `create` method to produce the real module object. It contains an array of `ɵmpd` *module provider definitions* that, for instance, tell which sanitizer or producer has to be created and injected:
+The `defFactory` is a *module defintion function*, `ɵmod`, used by the `create` method to produce the real module object. It contains an array of `ɵmpd` *module provider definitions* that, for instance, tell which sanitizer or producer has to be created and injected:
 
 ```javascript
 ...
@@ -447,9 +453,9 @@ export function createComponentFactory(
 }
 ```
 
-The factory is similar to the module one except for some more parameters. A component can have `@Input()` and `@Output` properties and hence the arrays `inputs` and `outputs`.
+The factory function is similar to the module one except for some more parameters. A component can have `@Input()` and `@Output` properties and hence the arrays `inputs` and `outputs`.
 
-__Tip__
+**Tip**
 It starts to be more and more clear how the component declaration is transformed into a set of arguments used by a factory to *programmatically* create the component at runtime.
 {: .notice--info}
 
@@ -457,7 +463,7 @@ It starts to be more and more clear how the component declaration is transformed
 
 What happened to template? This is why you have read so far... I hope :sweat_smile:
 
-The component template has been transformed in a JavaScript object with the [following interface](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L53):
+The component template has been transformed into a JavaScript object with the [following interface](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L53):
 
 ```javascript
 export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
@@ -495,14 +501,14 @@ export function View_AppComponent_Host_0(_l) {
 }
 ```
 
-Host selector since the component is attached/hosted by the selector, the Angular component is a directive, hence the view definition is characterized by:
+*Host selector*{: .italic-red-text} since the component is attached/hosted by the selector, the Angular component is a directive, hence the view definition is characterized by (*links point to the Angular source code on GitHub*):
 
 - *element definition*{: .italic-blue-text }, `ɵeld`, the `app-root`, the function produces an [`ElementDef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L245);
 - *directive definition*{: .italic-blue-text }, `ɵdid`, the directive that represents the component, the function [`directiveDef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/provider.ts#L30) produces an object of type [`NodeDef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L110).
 
 Both produced objects are of type [`NodeDef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/types.ts#L110).
 
-The element definition `ɵeld` references then `View_AppComponent_0`, the other JavaScript code that represents the component template:
+The *element definition* `ɵeld` references then `View_AppComponent_0`, the other JavaScript code that represents the component template:
 
 ```javascript
 export function View_AppComponent_0(_l) {
@@ -522,7 +528,7 @@ export function View_AppComponent_0(_l) {
 }
 ```
 
-The `ɵvid`, [`viewDef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/view.ts#L23) function, takes two view update functions: `updateDirectives` and `updateRenderer` for the change detection.
+The `ɵvid`, [`viewDef`](https://github.com/angular/angular/blob/d2222541e8acf0c01415069e7c6af92b2acbba4f/packages/core/src/view/view.ts#L23) function, takes two view update functions: `updateDirectives` and `updateRenderer` for the change detection along with the function to create the element the first time the application is loaded.
 
 {% capture notice-text %}
 In a view defintion function `ɵvid` there are two interesting things:
@@ -536,9 +542,15 @@ In a view defintion function `ɵvid` there are two interesting things:
   {{ notice-text | markdownify }}
 </div>
 
+**Angular Ivy**
+In Angular Ivy there are no more `.ngfactory.js` files, all the required code for *view creation*{: .italic-lime-text} and *change detection*{: .italic-lime-text} is inside the component. Imho the incremental DOM if fully implemented in Ivy, what is missing in View Engine is the possibility to tree-shake the runtime to squeeze it as much as possible.
+{: .notice--special}
+
 ## How Angular application bootstraps
 
-Now build the application and start a live server to debug it into the browser:
+Once the compiled code has been analyzed, it is interesting to see the call sequence to the Angular runtime to find which function renders the component. At the end of the sequence there must be the sought after `document.createElement()` function call to the DOM API.
+
+Build the application and start a live server to debug it into the browser:
 
 ```bash
 ng build --aot
@@ -549,13 +561,9 @@ npx http-server dist/test-ivy
 
 Basically the compiler manages metadata interpretation and template compilation that can be controlled specifying some template compiler options in the `tsconfig.json`.
 
-**Remember**
-Activate the Ahead-of-Time compilation to have everything in JavaScript and saved to disk make it easier to inspect the generated code.
-{: .notice--warning}
-
-**Internals**
-The application code is composed by `app.module.ts` and `app.component.ts`. First Angular runtime has to be started, then it creates the platform linked to the page, starts the application and finally the module. Once the module has been started the component can be instantiated and rendered.
-{: .notice--internals}
+**Angular Ivy**
+Activate the Ahead-of-Time compilation to have everything in JavaScript and *saved to disk*{: .italic-lime-text} make it easier to inspect the generated code. With Angular Ivy `--aot` is not necessary anymore since it is activated by default. Ivy compilation is so fast that AoT compilation can be always used.
+{: .notice--special}
 
 ### 0. IIEF
 
@@ -566,16 +574,23 @@ import { platformBrowser } from '@angular/platform-browser';
 
 import { AppModuleNgFactory } from './app.module.ngfactory';
 
+// *** Follow bootstrapModuleFactory() ***
 platformBrowser().bootstrapModuleFactory(AppModuleNgFactory);
 ```
 
-__Tip__
+*Pay attention:*{: .italic-red-text} in each piece of code there is a comment that allows to follow the bootstrap call sequence `// *** Follow`.
+
+**Tip**
 When invoking the `ng build` and not simply the compiler as done before, Webpack bundles what has been produce by the compiler, so opening the files results in a slightly different code.
 {: .notice--info}
 
 ![image-center](/assets/images/posts/angular-bootstrap-in-deep/bootstrap-sequence.png){: .align-center}
 
-*Basically*{: .italic-blue-text } the IIEF function bootstraps the platform `PlatformRef`, that, in turn, instantiates the application `ApplicationRef` and then the module along with all the required injectable providers. Finally the component is created and rendred into the DOM.
+*Basically*{: .italic-blue-text } the IIEF function bootstraps the platform `PlatformRef`, that, in turn, instantiates the application `ApplicationRef` and then the module along with all the required injectable providers. Finally the component is created and rendered into the DOM.
+
+**Internals**
+The application code is composed by `app.module.ts` and `app.component.ts`. First Angular runtime has to be started, then it creates the *platform* linked to the page, starts the *application* that is the *module*. Once the module has been started the *component* can be instantiated and rendered.
+{: .notice--internals}
 
 ### 1. Platform
 
@@ -598,6 +613,7 @@ class PlatformRef {
         // from here the ApplicationRef is created and available to be injected
         const moduleRef = InternalNgModuleRef<M>moduleFactory.create(ngZoneInjector);
         ...
+        // *** Follow _moduleDoBootstrap() ***
         // moduleType: *class AppModule*
         this._moduleDoBootstrap(moduleRef);
         return moduleRef;
@@ -612,7 +628,9 @@ class PlatformRef {
       ...
       const appRef = moduleRef.injector.get(ApplicationRef) as ApplicationRef;
       ...
+      // loop over the array defined in the @NgModule, bootstrap: [AppComponent]
       moduleRef._bootstrapComponents.forEach((
+        // *** Follow bootstrap() ***
         // bootstrap the root component *AppComponent* with selector *app-root*
         f => appRef.bootstrap(f)));
       ));
@@ -643,6 +661,7 @@ The [`ApplicationRef`](https://github.com/angular/angular/blob/d2222541e8acf0c01
          * viewDefFactory: View_AppComponent_Host_0()
          * selector: app-root
          */
+        // *** Follow create() ***
         const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
         ...
       }
@@ -665,25 +684,6 @@ Build the root component:
 *Basically*{: .italic-blue-text } the Angular [`component_factory.ts`](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/linker/component_factory.ts#L79) holds the base class method to create a component of a certain type:
 
 ```javascript
-/**
- * Base class for a factory that can create a component dynamically.
- * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
- * Use the resulting `ComponentFactory.create()` method to create a component of that type.
- *
- * @see [Dynamic Components](guide/dynamic-component-loader)
- */
-export abstract class ComponentFactory<C> {
-  ...
-  /**
-   * Creates a new component.
-   */
-  abstract create(
-      injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string|any,
-      ngModule?: NgModuleRef<any>): ComponentRef<C>;
-}
-```
-
-```javascript
 class ComponentFactory_ extends ComponentFactory<any> {
   
   viewDefFactory: ViewDefinitionFactory;
@@ -699,6 +699,7 @@ class ComponentFactory_ extends ComponentFactory<any> {
     }
     const viewDef = resolveDefinition(this.viewDefFactory);
     const componentNodeIndex = viewDef.nodes[0].element !.componentProvider !.nodeIndex;
+    // *** Follow createRootView() ***
     const view = Services.createRootView(
         injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
     const component = asProviderData(view, componentNodeIndex).instance;
@@ -721,6 +722,7 @@ The code is going to arrive to the point where the DOM API is called to create a
 function createRootView(root, def, context) {
   const view = createView(root, root.renderer, null, null, def);
   initView(view, context, context);
+  // *** Follow createViewNodes() ***
   createViewNodes(view);
   return view;
 }
@@ -735,6 +737,7 @@ function createViewNodes(view) {
     switch (nodeDef.flags & 201347067 /* Types */) {
       case 1 /* TypeElement */:
         // H1 DOM element of type any, the function calls the DOM renderer to render the element
+        // *** Follow createElement() ***
         const el = (createElement(view, renderHost, nodeDef)));
         ...
         // View_AppComponent_0()
@@ -754,9 +757,7 @@ function createViewNodes(view) {
 
 The [`createElement`](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/view/element.ts#L151) function will use the injected renderer to create the element.w.r.t. the platform where the application runs.
 
-In case of `PlatformBrowser`, the [`DefaultDomRenderer2`](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/platform-browser/src/dom/dom_renderer.ts#L115) class invokes the `document` interface method to create the real DOM element.
-
-`DefaultDomRenderer2` extends and implements [`abstract class Renderer2`](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/render/api.ts#L108).
+In case of `PlatformBrowser`, the [`DefaultDomRenderer2`](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/platform-browser/src/dom/dom_renderer.ts#L115) class invokes the `document` interface method to create the real DOM element. `DefaultDomRenderer2` extends and implements [`abstract class Renderer2`](https://github.com/angular/angular/blob/d192a7b47a265aee974fb29bde0a45ce1f1dc80c/packages/core/src/render/api.ts#L108).
 
 ```javascript
 createElement(name: string, namespace?: string): any {
@@ -766,6 +767,7 @@ createElement(name: string, namespace?: string): any {
       return document.createElementNS(NAMESPACE_URIS[namespace] || namespace, name);
     }
 
+    // *** FOUND ***
     return document.createElement(name);
   }
 ```
@@ -773,109 +775,6 @@ createElement(name: string, namespace?: string): any {
 **Tip** An HTML template is transformed in an *intermediate* format or Object Model by the Angular compiler.
 Factory functions are automatically generated by the compiler and they are able to produce an object that can create a component or a node or a module. Then a renderer, specified by the chosen platform, will produce DOM elements in case of a DOM renderer.
 {: .notice--info}
-
-## The essential sequence
-
-#### Platform creation
-
-```javascript
-/**
- * The Angular platform is the entry point for Angular on a web page.
- */
-PlatformRef {
-  /**
-   * Creates an instance of an `\@NgModule` for the given platform
-   * for offline compilation.
-   */
-  bootstrapModuleFactory(moduleFactory, options) {
-    return ngZone.run((
-      ...
-      this._moduleDoBootstrap(moduleRef); // moduleType: class AppModule
-      return moduleRef;
-      ...
-  }
-
-  /**
-   * Bootstrap all the components of the module
-   */
-  _moduleDoBootstrap(moduleRef) {
-    ...
-    moduleRef._bootstrapComponents.forEach((
-      f => appRef.bootstrap(f))); // bootstrap the root component AppComponent with selector app-root
-    ))
-  }
-}
-```
-
-#### Application creation
-
-```javascript
-class ApplicationRef {
-  /**
-   * Bootstrap a new component at the root level of the application.
-   * When bootstrapping a new root component into an application, Angular mounts the
-   * specified application component onto DOM elements identified by the componentType's
-   * selector and kicks off automatic change detection to finish initializing the component.
-   */
-  bootstrap(componentOrFactory, rootSelectorOrNode) {
-    ...
-    /**
-     * Use the componentFactory to create the root element app-root having this information:
-     * componentType: class AppComponent
-     * viewDefFactory: View_AppComponent_Host_0()
-     * selector: app-root
-     */
-    const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
-    ...
-  }
-}
-```
-
-#### Component creation
-
-```javascript
-class ComponentFactory_ extends ComponentFactory {
-  ...
-  create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
-    const view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
-  }
-}
-```
-
-```javascript
-function createRootView(root, def, context) {
-  const view = createView(root, root.renderer, null, null, def);
-  initView(view, context, context);
-  createViewNodes(view);
-  return view;
-}
-```
-
-Call the renderer:
-
-```javascript
-function createViewNodes(view) {
-  const nodes = view.nodes;
-  for (let i = 0; i < def.nodes.length; i++) {
-    switch (nodeDef.flags & 201347067 /* Types */) {
-      case 1 /* TypeElement */:
-        // H1 DOM element of type any, the function call the DOM renderer to 
-        const el = (createElement(view, renderHost, nodeDef)));
-        ...
-        // View_AppComponent_0()
-        const compViewDef = resolveDefinition(((nodeDef.element)).componentView)));
-        ...
-        break;
-      case 2 /* TypeText */:
-        ...
-        break;
-      ...
-    }
-  }
-}
-```
-
-Finally resolve the token `title`.
 
 ## Conclusions
 
