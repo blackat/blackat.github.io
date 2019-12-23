@@ -8,11 +8,31 @@
 $global-font-family: "Source Sans Pro", sans-serif !important;
 $link-color: #2980B9;
 $highlighted-color: #E74C3C;
+
 $blue: #2980B9;
-$light-blue: #EBF5FB;
+$blue-light: #EBF5FB;
+$blue-dark: #3498DB;
+$blue-code: #D4E6F1;
+
 $red: #E74C3C;
-$light-red: #FDEDEC;
-$dark-gray: #34495E;
+$red-light: #FDEDEC;
+$red-dark: #E74C3C;
+$red-code: #E6B0AA;
+
+$gray-dark: #34495E;
+
+$violet: #9B59B6;
+$violet-light: #F4ECF7;
+$violet-dark: #8E44AD;
+$violet-code: #E8DAEF;
+
+$yellow-light: #FEF5E7;
+$yellow-dark: #F1C40F;
+$yellow-code: #F9E79F;
+
+$green-lime-light: #F9FBE7;
+$green-lime-dark: #C0CA33;
+$green-lime-code: #E6EE9C;
 /*************************************************
     syntax highlighting ($base16)
 *************************************************/
@@ -88,13 +108,19 @@ a {
 
 // Can be used to highlight a word as well, e.g. *word*{: .italic-red-text }
 .italic-red-text {
-  color: $highlighted-color;
+  color: $red-dark;
   font-weight: 600;
   font-style: normal;
 }
 
 .italic-violet-text {
-  color: #8E44AD;
+  color: $violet-dark;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.italic-blue-text {
+  color: $blue-dark;
   font-weight: 600;
   font-style: normal;
 }
@@ -146,7 +172,7 @@ tt,code,kbd,samp,pre {
     Blockquote
 *************************/
 blockquote {
-  border-left-color: $dark-gray;
+  border-left-color: $gray-dark;
 }
 
 /*************************
@@ -160,73 +186,96 @@ p strong:first-child {
 
 // colors from https://htmlcolorcodes.com/
 
-.notice--primary {
-  background-color: #e5e7e9;
-  font-size: 0.9em !important;
-
-  code {
-    background-color: #f2f3f4;
-  }
-
-  a {
-    color: #a6acaf;
-  }
-}
-
-.notice--internal {
+// notice base
+.notice-base-blackat {
   @extend .notice;
-  background-color: #d2b4de;
+  box-shadow: none;
+  border-radius: 0px;
+  border-radius: 0px;
   font-size: 0.9em !important;
+}
+
+// notice primary
+.notice--special {
+  @extend .notice-base-blackat;
+
+  border-left: 8px solid $green-lime-dark;
+  background-color: $green-lime-light;
 
   code {
-    background-color: #e8daef;
+    background-color: $green-lime-code;
   }
 
   a {
-    color: #7d3c98;
+    color: $green-lime-dark;
+  }
+
+  strong:first-child {
+    color: $green-lime-dark;
   }
 }
 
+// notice internal
+.notice--internals {
+  @extend .notice-base-blackat;
+
+  border-left: 8px solid $violet-dark;
+  background-color: $violet-light;
+
+  code {
+    background-color: $violet-code;
+  }
+
+  a {
+    color: $violet-dark;
+  }
+
+  strong:first-child {
+    color: $violet;
+  }
+}
+
+// notice info
 .notice--info {
-  border-left: 8px solid $blue;
-  background-color: $light-blue;
-  font-size: 0.9em !important;
-  box-shadow: none;
-  border-radius: 0px;
+  @extend .notice-base-blackat;
+
+  border-left: 8px solid $blue-dark;
+  background-color: $blue-light;
 
   code {
-    background-color: #d6eaf8;
+    background-color: $blue-code;
   }
 
   a {
-    color: $blue;
+    color: $blue-dark;
   }
 
   strong:first-child {
-    color: $blue;
+    color: $blue-dark;
   }
 }
 
+// notice warning
 .notice--warning {
-  border-left: 8px solid #F1C40F;
-  background-color: #FCF3CF;
-  font-size: 0.9em !important;
-  box-shadow: none;
-  border-radius: 0px;
+  @extend .notice-base-blackat;
+
+  border-left: 8px solid $yellow-dark;
+  background-color: $yellow-light;
 
   code {
-    background-color: #fcf3cf;
+    background-color: $yellow-code;
   }
 
   a {
-    color: #d4ac0d;
+    color: $yellow-dark;
   }
 
   strong:first-child {
-    color: #d4ac0d;
+    color: $yellow-dark;
   }
 }
 
+// notice success
 .notice--success {
   background-color: #a2d9ce;
   font-size: 0.9em !important;
@@ -242,18 +291,18 @@ p strong:first-child {
   }
 }
 
+// notice danger
 .notice--danger {
-  border-left: 8px solid $red;
-  background-color: $light-red;
-  font-size: 0.9em !important;
-  box-shadow: none;
-  border-radius: 0px;
+  @extend .notice-base-blackat;
+
+  border-left: 8px solid $red-dark;
+  background-color: $red-light;
 
   code {
-    background-color: #f5b7b1;
+    background-color: $red-code;
   }
 
   a {
-    color: #cb4335;
+    color: $red-dark;
   }
 }
