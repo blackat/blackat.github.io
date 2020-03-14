@@ -475,7 +475,7 @@ A template and expressions
 they are compiled into TypeScript code becoming *type check blocks*{: .italic-red-text }. So blocks are sent to TypeScript compiler and possible errors are then return *in the context of the template*.
 
 ```javascript
-fucntion typeCheckBlock(ctx: AppComponent) {
+function typeCheckBlock(ctx: AppComponent) {
     let cmp!: AccountViewCmp;
     let pipe!: ng.AsyncPipe;
 
@@ -489,9 +489,70 @@ fucntion typeCheckBlock(ctx: AppComponent) {
 
 How is it possible to return an error in the context of a template? Well, code is translated with additional `offset comments` that allows then the contextualization.
 
+#### Example
+
+```javascript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div style="text-align:center">
+      <h1>
+        {% raw %}Welcome to {{ title }}!{% endraw %}
+
+        <tr *ngFor="let hero of heroes">
+            <td>{% raw %}{{hero.name}}{% endraw %}</td>
+        </tr>
+      </h1>
+    </div>
+  `,
+  styleUrls: []
+})
+export class AppComponent {
+  @Input() title = 'Angular';
+
+  heroes = 'fake array';
+}
+```
+
+Angular version 9 *with Ivy enabled* maintains the behavior of the `fullTemplateTypeCheck` flag and introduces a strict mode with the flag `strictTemplates` that goes beyond the Angular 8 type checker. Activate the strict mode in the `tsconfig.json`:
+
+```javascript
+...
+"angularCompilerOptions": {
+    "fullTemplateTypeCheck": true,
+    "strictTemplates": true,
+    ...
+}
+```
+
+Re-run the `npm run ngc` and get a full better error reported by the compiler:
+
+```bash
+src/app/app.component.html:7:13 - error NG2339: Property 'name' does not exist on type 'string'.
+
+7       <td>{% raw %}{{hero.name}}{% endraw %}</td>
+              ~~~~~~~~~
+
+  src/app/app.component.ts:5:16
+    5   templateUrl: './app.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component AppComponent.
+
+```
+
+More details available on the [template type-check page](https://angular.io/guide/template-typecheck).
+
 ## Conclusions
 
-// todo
+The Angular 9 Ivy rendering architecture introduces a new compiler and a new rendering engine not only to exploit the incremental DOM technique but also a more powerful compiler.
+
+Ivy is enabled by default, `--aot` is the default way of developing since the new compiler is faster than the previous one. Having AoT mode enable by default reduces also the risk of discrepancies between development and production code.
+
+Ivy compiler goes even further, it has a better type-check making the reported error much more explicative and easier for the developer to identify the root cause of the issue.
+
+We all are looking forward to see the new compiler applied to Angular Elements.
 
 ## References
 
