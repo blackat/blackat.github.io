@@ -15,33 +15,43 @@ toc_sticky: true
 ---
 
 > Why does Angular have a compiler at all?
+> Main job of the compiler is to turn the template you write into the code that runs the Angular runtime.
+> 
 > Alex Rickabaugh - Angular Connect 2019
 
-Basically what the compiler actually doing? The goal is to make an application smaller and faster.
+In Angular, the developer write templates *declaratively* that is *what to render*{: .italic-red-text}, the binding, etc. *but not how it happens at runtime*{: .italic-red-text}, there is not description about how the change detection mechanism works. The Angular runtime does not understand the *declarative template syntax* so it has to be translated into something the runtime can run into a browser.
 
-> Main job of the compiler is to turn the template you write into the code that runs at runtime.
-
-In Angular the developer write templates *declaratively*, what to render, the binding, etc. *but not how it happens at runtime*, there is not description about how the change detection mechanism works. The browser does not udnerstand the *declarative template* so it has to be translated into something a browser can understand.
-
-The compiler takes the *declarative Angular syntax* and turn it into *imperative code*.
+The compiler takes the *declarative Angular syntax*{: .italic-red-text } and turns it into *imperative code*{: .italic-red-text }.
 
 Why, again, a compiler is required? not possible to do by hand?
 
-- lot of boilerplate code, better to focus on the business logic than how things work under the hood;
-- Angular team can optimize and improve by release w.r.t. browser evolution the iperative code.
+- Lot of boilerplate code, better to focus on the business logic than how things work under the hood.
+- Angular team can optimize and improve by release w.r.t. browser evolution the imperative code.
 
 ## Lingo
 
-- *Angular Compiler:*{: .italic-violet-text} part of the Angular rendering architecture that transforms templates and decorators into something that the Angular runtime can understand.
+- *Angular Compiler:*{: .italic-violet-text} part of the Angular rendering architecture that transforms *templates* and *decorators* into something that the Angular runtime can understand.
 - *Angular Runtime:*{: .italic-violet-text} part of the Angular rendering architecture that runs an Angular application.
-- *Angular template declarative syntax:*{: .italic-violet-text} describes *what* the view has to look like, *what* the view has to display data, but not *how*.
-- *Angular application imperative code:*{: .italic-violet-text} describes *how* the view has to be rendered via a sequence of JavaScript instructions/commands.
+- *Angular template declarative syntax:*{: .italic-violet-text} describes *what*{: .italic-red-text } the view has to look like, *what*{: .italic-red-text } the view has to display, but not *how*{: .italic-red-text }.
+- *Angular application imperative code:*{: .italic-violet-text} describes *how*{: .italic-red-text } the view has to be rendered via a sequence of JavaScript instructions/commands.
+- *Metadata:*{: .italic-violet-text} set of data enclosed into a decorator that describes the entity represented by the decorator itself. For instance a component has the selector, the template, etc. Metadata are then reused by the compiler and put into the definition files `.d.ts`, the component API. Basically the metadata help to preserve the information removed from `.js` files.
 
-## Why Angular has a compiler
+## Quick overview
 
-The quick answer is to transform templates and decorators into something the *runtime* can understand.
+The work done on the new Angular compiler can be divided in three categories as stated in the [implementation status](https://github.com/angular/angular/blob/master/packages/core/src/render3/STATUS.md):
+- `@angular/compiler-cli`: TypeScript transformer pipeline which includes two CLI tools
+  - `ngtsc`: the Angular TypeScript compiler which looks for the [Angular decorators](https://github.com/angular/angular/blob/master/packages/core/src/render3/STATUS.md#decorators) like `@Component` and substitute them with their specific Angular Runtime instructions/counterparts like `ɵɵdefineComponent`.
+  - `ngcc`: the Angular Compatibility Compiler which converts pre-ivy modules into ivy-module, can be even run as part of a code loader like Webpack to have packages from `node_modules` transpiled on-the-fly.
+- `@angular/compiler`: Ivy Compiler which converts decorators into Ivy.
+- `@angular/core`: decorators which can be converted by the `@angular/compiler`.
 
-The *Angular rendering architecture*{: .italic-red-text } is composed by the *Angular compiler*{: .italic-red-text } and the *Angular runtime*{: .italic-red-text }: the former transforms the application source code into something the latter can run.
+## Angular Ivy compiler model
+
+The [Ivy model](https://github.com/angular/angular/blob/master/packages/compiler/design/architecture.md#the-ivy-compilation-model) foresees to compile the Angular decorators like `@Injectable`, `@Component`, etc into *static properties*{: .italic-red-text }.
+
+All the decorators do not need global knowledge of the application, except `@Component` which requires information coming from `@NgModule`. In the module other selectors used by the *component template*{: .italic-red-text } are declared and so [the transitive closure of the exports of that module imports](https://github.com/angular/angular/blob/master/packages/compiler/design/architecture.md).
+
+Without those information the *component def*{: .italic-red-text } (`ɵcmp`) cannot be correctly generated.
 
 Consider the `Welcome to Angular!` application:
 
@@ -62,63 +72,139 @@ export class AppComponent {
 }
 ```
 
-The previous code is made of *decorators*{: .italic-red-text } like `@Component`, `@Input` and *Angular template declarative syntax*{: .italic-red-text } that provides developers with an easy grammar to both write control flow statements, like the `for loop` and `if` conditional statement, and make data binding between the variables declared in the controller and used in the templates.
+The previous code is characterized by *decorators*{: .italic-red-text } like `@Component` and `@Input`, part of the *Angular template declarative syntax*{: .italic-red-text } that provides developers with an easy template grammar to both
+
+- write *control flow statements*, like the `for loop` and `if` *conditional statement*,
+- and make *data binding* between the variables declared in the controller and used in the templates.
 
 **Tip**
-For most of the developers the binding is just the use of the same variable name between the template and the controller without thinking about the mechanism that manages the *change detetction* at runtime. This is a great thing, the Angular compiler adds this mechanism. Less boilerplate code, templates are mode readable and less error prone.
+For most of the developers the *binding* is just the use of the same variable name between the template and the controller, but there is a mechanism that manages the *change detection* at runtime. This is a great thing and the Angular compiler automatically adds this mechanism. Less boilerplate code, templates are mode readable and less error prone.
 {: .notice--info}
 
-The Angular runtime is *a collection of JavaScript instructions/functions* able to render a component template into the DOM and to answer to change detection when something in the model has changed (MVC). So everything must be in JavaScript, ready to be run, so the Angular declarative syntax must be then translated into this instructions.
+The *Angular runtime*{: .italic-red-text } is *a collection of JavaScript instructions/functions* able to render a component template into the DOM and to answer to change detection when something in the model has changed (MVC). Everything must be in JavaScript, ready to be run, so the Angular declarative syntax is translated into these instructions.
 
-To make it more clear try to develop a standard Web Component: when the developer has to deal with the template he must deal with the DOM API to create an element and attach it to the DOM, write some code to detect changes in the model and update the view. In the Angular code there is not trace of these operations since a template is translated into *JavaScript imperative code*{: .italic-red-text }, a series of JavaScript instructions, part of the Angular runtime, that, when invoked, create the component in the browser.
+To make it more clear try to develop a standard Web Component: when the developer has to deal with the template he must deal with the DOM API to create an element and attach it to the DOM, write some code to detect changes in the model and update the view. In the Angular code there is not trace of these operations since a template is translated into *JavaScript imperative code*{: .italic-red-text }, a series of JavaScript instructions, part of the Angular runtime, that, when invoked, creates the component in the browser.
 
 Most of the tedious and repetitive job is done by the Angular compiler in conjunction with the Angular runtime.
 
 ### Compiler enables decoupling
 
-The developer just writes the Angular modules and components, the *what*, via the Angular declarative syntax but it does not know/care about the *how* things are run at runtime: *compiler enables to decouple the what from the how*{: .italic-red-text }.
+The developer just writes the Angular modules and components, that is the *what*{: .italic-red-text }, via the Angular declarative syntax but it does not know/care about the *how*{: .italic-red-text }, that is how things are executed at runtime: *compiler enables to decouple the what from the how*{: .italic-red-text }.
 
 This approach has multiple advantages:
 - [minimize or eliminate side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) making the developer life simpler;
-- if the Angular rendering architecture evolve small or null changes are required to use the latest version;
-- browsers change more and more often as the EcmaScript hence the *how* the templates are rendered can change accordingly optimizing web performance for instance;
+- if the Angular rendering architecture evolves, small or null changes are required to use the latest version;
+- browsers change more and more often as the EcmaScript hence the *how*{: .italic-red-text } the templates are rendered can change accordingly optimizing web performance for instance;
 - templates and decorators can be compiled differently w.r.t. the platform where the code is run such ES5 or ES6 with module support.
 
-### JiT vs. AoT
+## Simple project setup
 
-Compiler can work in *JiT (Just in Time)* mode, it is delivered along with the application and compiles at runtime. *AoT (Ahead of time) compilation* instead compiles everything at build time making the application faster and it does not required to ship the compiler with the application.
+Angular 9 has been recently released, generate a simple project with Angular 9 running:
 
-## Compilation steps
+```bash
+npm install -g @angular/cli     // to install the Angular CLI
+ng new angular-nine-ivy         // or the name you want
+```
 
-![image-center](/assets/images/posts/angular-compiler-introduction/compiler-steps.png){: .align-center}
+In case you already have a workspace with some changes you have to commit or stash them, otherwise add the flag `--allow-dirty`.
 
-The Angular compilation process is built on top the TypeScript one which is made of three steps.
+If you already have the old Angular CLI, it seems the better way is to uninstall the old one and the install the new globally.
 
-**Tip**
-The TypeScript compiler cannot compile the Angular templates and decorators, so the Angular compiler kicks in doing the job the previous one cannot do. Once finished the TypeScript compiler can go on, using now the outcome of the `ngc`. In other words the Angular compiler allows the code written in Angular declarative syntax to participate to the TypeScript compilation process.
-{: .notice--info}
+### Let's compile
 
-#### Program creation
+There are two compiler entry points in the `@angular/compiler-cli`: `ngtsc` and `ngcc`.
 
-Starting from the `tsconfig.json` file, the TypeScript process discover the application source files via the `import` statements.
+#### `ngtsc`
 
-#### Analysis
+It is the [TypeScript to JavaScript transpiler that reifies the Angular decorators into static properties](https://github.com/angular/angular/blob/master/packages/compiler/design/architecture.md#high-level-proposal). `ngc` works like the `ngtsc` when Ivy is enabled.
 
-The Angular compiler takes all the `.ts` files collected and, class by class, looks for Angular declarative syntax code, basically Angular things. The compiler gathers isolation information about components for instance, but not about modules.
+#### `ngcc`
 
-#### Resolve
+It is the Angular Compatibility Compiler that process the NPM library code from the `node_modules` folder producing equivalent library code Ivy compatible. `ngcc` can also be run by a code loader like Webpack to get packages transpiled on demand instead of written in the `node_module` package folder.
 
-The Angular compiler looks again at the whole application but his this in a larger picture including modules as well. All the code now is understandable and parsable by the next step of the TypeScript compiler. Optimizations will take place at this step.
+#### `ngc`
 
-#### Type checking
+Open the `package.json` and add the `ngc` script:
 
-TypeScript checks error in the application, templates included, that now are a series of imperative instructions.
+```javascript
+"scripts": {
+    "ng": "ng",
+    ...
+    "ngc": "ngc"
+}
+```
 
-#### Emit
+In the `tsconfig.json` set `"declaration": true,` in order to have the `.d.ts` files as well, then run:
 
-The most expensive operation in the compilation process, the TypeScript code is transformed into JavaScript ready to be run by the browser. Angular component classes have now only imperative code to describe what a template looks like.
+```bash
+$ npm run ngc
+```
 
-## TypeScript compilation model
+The result of the component compilation is located at `dist\out-tsc\src`. The `Welcome to Angular!` component is translated into:
+
+```javascript
+import { Component, Input } from '@angular/core';
+import * as i0 from "@angular/core";
+export class AppComponent {
+    constructor() {
+        this.title = 'Angular';
+    }
+}
+AppComponent.ɵfac = function AppComponent_Factory(t) { return new (t || AppComponent)(); };
+AppComponent.ɵcmp = i0.ɵɵdefineComponent({ type: AppComponent, selectors: [["app-root"]], inputs: { title: "title" }, decls: 3, vars: 1, consts: [[2, "text-align", "center"]], template: function AppComponent_Template(rf, ctx) { if (rf & 1) {
+        i0.ɵɵelementStart(0, "div", 0);
+        i0.ɵɵelementStart(1, "h1");
+        i0.ɵɵtext(2);
+        i0.ɵɵelementEnd();
+        i0.ɵɵelementEnd();
+    } if (rf & 2) {
+        i0.ɵɵadvance(2);
+        i0.ɵɵtextInterpolate1(" Welcome to ", ctx.title, " ");
+    } }, styles: [""] });
+/*@__PURE__*/ (function () { i0.ɵsetClassMetadata(AppComponent, [{
+        type: Component,
+        args: [{
+                selector: 'app-root',
+                template: `
+    <div style="text-align:center">
+      <h1>
+        Welcome to {{ title }}
+      </h1>
+    </div>
+  `,
+                styleUrls: ['./app.component.css']
+            }]
+    }], null, { title: [{
+            type: Input
+        }] }); })();
+```
+
+and then the `app.component.d.ts` definition file:
+
+```javascript
+import * as i0 from "@angular/core";
+export declare class AppComponent {
+    title: string;
+    static ɵfac: i0.ɵɵFactoryDef<AppComponent>;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<AppComponent, "app-root", never, { "title": "title"; }, {}, never>;
+}
+```
+
+**Attention**
+By default Ivy is enabled, if you disable it you will get a different compilation output.
+{: .notice--warning}
+
+### JIT vs. AoT
+
+Compiler can work in *JiT (Just in Time)* mode, it is delivered along with the application and compiles at runtime. *AoT (Ahead of Time) compilation* instead compiles everything at build time making the application faster and it does not required to ship the compiler with the application.
+
+With Angular 9, thanks to Ivy, the compilation is faster and by default `"aot": true`.
+
+## Compilation models
+
+Both TypeScript and Angular Compiler preserve important metadata that cannot be part of the emitted `.js` files. Angular enhances the `.d.ts` files with framework specific metadata to be reused for better component type checking.
+
+### TypeScript compilation model
 
 JavaScript code has no type information, it is just ready to be executed in the browser. The TypeScript compiler has transformed all the `.ts` source files but typing information are not totally lost, the definition files help to preserve the interface for future use.
 
@@ -139,11 +225,11 @@ declare class AwesomeLib {
 }
 ```
 
-## Angular Ivy compilation model
+### Angular Ivy compilation model
 
-An Angular component has some useful information declared in the decorator like the `selector`, these information are really important to use the component elsewhere and static type check the code.
+An Angular component has some useful information declared in the decorator like the `selector`. These information are really important to use the component elsewhere and static type check the code.
 
-The Angular Ivy compiler has been improved to not waste this information and enrich the definition file public interface. For instance, the following Angular component
+The Angular Ivy compiler has been improved to not waste this information and to enrich the definition file public interface. For instance, the following Angular component:
 
 ```javascript
 @Component({
@@ -167,7 +253,7 @@ export declare class AwesomeComponent() {
 }
 ```
 
-The definition file became the *component public API*{: .italic-red-text }. The compiler can use it in order to type check the code that will use it:
+The definition file became the *component public API*{: .italic-red-text }. The compiler can exploit it in order to type check the code that will use it:
 
 ```javascript
 <awesome-comp [value]="a value">
@@ -175,7 +261,73 @@ The definition file became the *component public API*{: .italic-red-text }. The 
 </awesome-comp>
 ```
 
+## TypeScript transpiler architecture
+
+The following diagram, [thanks to Angular team](https://github.com/angular/angular/blob/master/packages/compiler/design/architecture.md#typescript-architecture), shows the normal `tsc` flow and the steps to transpile a `.ts` file into the `.js` one.
+
+```bash
+                                                                |------------|
+                           |----------------------------------> | TypeScript |
+                           |                                    |   .d.ts    |
+                           |                                    |------------|
+                           |
+|------------|          |-----|               |-----|           |------------|
+| TypeScript | -parse-> | AST | ->transform-> | AST | ->print-> | JavaScript |
+|   source   |    |     |-----|       |       |-----|           |   source   |
+|------------|    |        |          |                         |------------|
+                  |    type-check     |
+                  |        |          |
+                  |        v          |
+                  |    |--------|     |
+                  |--> | errors | <---|
+                       |--------|
+```
+
+- **parse:** recursive descent parser that produces the abstract syntax tree (AST);
+- **type check:** perform type analysis on every file, report found error. Not modified by the `ngtsc`;
+- **AST to AST:** remove type declarations, convert class into ES5, `async` methods, etc.
+
+### Extension points
+
+TypeScript `tsc` provides some extension points to alter its output:
+
+- `CompilerHost.getSourceFile` to modify the source;
+- `CustomTransformers` to alter the list of transforms;
+- `WriteFileCallback` to intercept the output before it is written.
+
+## Compilation steps
+
+The `ngtsc` is a wrapper around the `tsc`, the TypeScript compiler, that extends and modify the normal compilation flow.
+
+![image-center](/assets/images/posts/angular-compiler-introduction/compiler-steps.png){: .align-center}
+
+**Tip**
+The TypeScript transpiler cannot compile the Angular templates and decorators, so the Angular compiler kicks in to *reify Angular decorators into static properties*. Once finished the TypeScript compiler can go on producing JavaScript code. In other words *the Angular compiler allows the code written in Angular declarative syntax to participate to the TypeScript compilation process*{: .italic-blue-text }.
+{: .notice--info}
+
+### 1. Program creation
+
+Starting from the `tsconfig.json` file, the TypeScript process discover the application source files via the `import` statements.
+
+### 2. Analysis
+
+The Angular compiler takes all the `.ts` files collected and, class by class, looks for Angular declarative syntax code, basically Angular things. The compiler gathers isolation information about components for instance, but not about modules. *Remember*, for the `@Component` the compiler requires a global knowledge about the module due transitive closure resolution of the exports of the component module template imports used in the component template.
+
+### 3. Resolve
+
+The Angular compiler looks again at the whole application but this time in a larger picture including modules as well. All the code now is understandable and parsable by the next step of the TypeScript compiler. Optimizations will take place at this step.
+
+### 4. Type checking
+
+TypeScript checks error in the application, templates included, that now are a series of imperative instructions.
+
+### 5. Emit
+
+The most expensive operation in the compilation process, the TypeScript code is transformed into JavaScript ready to be run by the browser. Angular component classes have now only imperative code to describe what a template looks like.
+
 ## Compiler features
+
+Angular compiler has many interesting features, some of them have been enhanced and improved with the new Angular Ivy architecture. Let's see some of them.
 
 ### Module compilation scope
 
@@ -197,7 +349,7 @@ The developer declares the willingness to use the component in the array, then c
 
 The compiler can than uniquely match the component, verify the use of the selectors along with its attributes.
 
-## Export compilation scope
+### Export compilation scope
 
 A module can be used to export Angular components as a method to make visible the external world some implemented components.
 
@@ -234,7 +386,7 @@ The compiler then can:
 - generate the code and reference it accordingly;
 - help the tree-shaker to remove things that are not referenced.
 
-## Partial evaluation
+### Partial evaluation
 
 > Compiler actually attempt to almost run TypeScript code in decorators
 > 
@@ -310,7 +462,7 @@ import {SOME_MODULES} from './some_module'
 
 While the compilation goes on for `modules` properties, it cannot for `viewportSize` since the value cannot be figured out. An explicative error message is produced about styles.
 
-## Template type checking
+### Template type checking
 
 A template and expressions
 
@@ -337,44 +489,28 @@ fucntion typeCheckBlock(ctx: AppComponent) {
 
 How is it possible to return an error in the context of a template? Well, code is translated with additional `offset comments` that allows then the contextualization.
 
+## Conclusions
+
+// todo
+
 ## References
 
-- (The theory of Angular Ivy | Alex Richabaugh)[https://www.youtube.com/watch?v=isb5Ef6yI48]
-- (Angular Ivy by example | Jason Aden)[Angular Ivy by example | Jason Aden]
-- (Deep dive into the Angular Compiler | Alex Richabaugh)[https://www.youtube.com/watch?v=anphffaCZrQ]
-- (deep-dive-compiler)[https://blog.angularindepth.com/a-deep-deep-deep-deep-deep-dive-into-the-angular-compiler-5379171ffb7a]
-- (deep-dive-compiler video)[https://www.youtube.com/watch?v=QQ2plVD0gDI&feature=youtu.be&t=27m]
+- [Compiler architecture (Ivy)](https://github.com/angular/angular/blob/master/packages/compiler/design/architecture.md)
+- [The theory of Angular Ivy, Alex Richabaugh](https://www.youtube.com/watch?v=isb5Ef6yI48)
+- [Angular Ivy by example](https://www.youtube.com/watch?v=MMPl9wHzmS4)
+- [Deep dive into the Angular Compiler, Alex Richabaugh](https://www.youtube.com/watch?v=anphffaCZrQ)
+- [deep-dive-compiler](https://blog.angularindepth.com/a-deep-deep-deep-deep-deep-dive-into-the-angular-compiler-5379171ffb7a)
+- [deep-dive-compiler video](https://www.youtube.com/watch?v=QQ2plVD0gDI&feature=youtu.be&t=27m)
+- [Ivy engine in Angular](https://indepth.dev/ivy-engine-in-angular-first-in-depth-look-at-compilation-runtime-and-change-detection/)
 
-// to be removed
+### Angular Compiler Architecture
 
-### Compiler can transform in two ways: JIT and AOT
+- [Angular Compiler status](https://github.com/angular/angular/blob/master/packages/core/src/render3/STATUS.md)
+- [Angular Compiler Architecture](https://github.com/angular/angular/blob/master/packages/compiler/design/architecture.md)
+- [Angular separate compilation](https://github.com/angular/angular/blob/master/packages/compiler/design/separate_compilation.md)
+- [Angular compiler implementation status](https://github.com/angular/angular/blob/master/packages/core/src/render3/STATUS.md)
 
-#### JIT (development mode)
+### Tools
 
-Imperative code is generated at runtime. TypeScript is transpiled (`tsc`) into JavaScript, decorators (`@Component`) invoke the compiler.
-
-#### AoT
-
-Imperative code is generated at build time. `ngc` compiles TypeScript code into JavaScript and pre-compile the decorators into imperative code to be rendered in the browser avoiding the cost of runtime compilation.
-
-### Angular architecture
-
-To understand how the Angular compiler works and the all process, it is important to know how TypeScript works since the *Angular compiler is based on TypeScript*.
-
-The TypeScript compiler has *three phases*: Program Creation, Type Checking and Emit. The Angular compiler in built on top of the TypeScript one.
-
-Angular compiler uses the TypeScript ones plus additional phases. Let's see all the *compilation phases*.
-
-#### 1. Program creation (TypeScript)
-
-TypeScript process to discover all the application source files, it starts with the `tsconfig.json`. TypeScript gets initial files of the application, then via the `import` statements discover other files in the application itself or in the libraries. Once all the files have been collected, TypeScript can understand correctly check the types of the application.
-
-In the Angular compiler some more is added to this process, some extra steps that allows, for instance, to import `ngfactory` files to do some adavnced things in Angular.
-
-#### 2. Analysis (Angular)
-
-In this phase the Angular compiler takes all the TS files, class by class, and looks, one by one, for the classes decorated with Angular decorators, basically look for classes with *"Angular things"*. For instance it understands if something is a component or part of a template. The process is gathering information *in isolation*, for instance it gather information about a *component* but it does not know the *module* yet.
-
-#### 3. Resolve (Angular)
-
-Once all the information of classes has been collected, it looks again at the whole application. The compiler now looks at things in a larger picture.
+- [Tsickle](https://github.com/angular/tsickle)
+- [Terser](https://github.com/terser/terser)
