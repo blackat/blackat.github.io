@@ -389,7 +389,7 @@ The compiler then can:
 ### Partial evaluation
 
 > Compiler actually attempt to almost run TypeScript code in decorators
-> 
+>
 > Alex Rickabaugh - Angular Connect 2019
 {: .cite }
 
@@ -443,7 +443,7 @@ SOME_MODULES: {
 }
 ```
 
-where: 
+where:
 - `SOME_MODULES` is an object with two properties;
 - `DynamicValue` is an *indicator* to say *"cannot get past"*.
 
